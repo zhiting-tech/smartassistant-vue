@@ -80,17 +80,13 @@ export default {
     },
     // 退出登录
     logout() {
-      this.http.sessionLogout().then((res) => {
-        if (res.status !== 0) {
-          return
-        }
-        this.websocket.destroy()
-        this.$toast('退出成功')
-        this.$methods.setStore('token', '')
-        this.setToken('')
-        this.$router.replace({
-          name: 'professionLogin'
-        })
+      this.websocket.destroy()
+      this.$toast('退出成功')
+      this.$methods.setStore('token', '')
+      this.setToken('')
+      this.$methods.setStore('refreshToken', '')
+      this.$router.replace({
+        name: 'professionLogin'
       })
     },
     // 获取用户信息

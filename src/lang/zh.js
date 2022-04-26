@@ -11,6 +11,7 @@ export const global = {
   editSuccess: '编辑成功',
   delSuccess: '删除成功',
   traSuccess: '转移成功',
+  addSuccess: '添加成功',
   delSuccessChecked: '已删除家庭，同时删除智汀云盘存储的文件',
   isDelChecked: '同时删除智汀云盘存储的文件',
   add: '添加',
@@ -38,6 +39,9 @@ export const global = {
   day: '日',
   hour: '时',
   minute: '分',
+  second: '秒',
+  now: '现在',
+  timing: '定时',
   tra: '转移拥有者',
   copy: '复制',
   loadingVerify: '正在生成...',
@@ -57,6 +61,11 @@ export const global = {
   updateSuccess: '更新成功',
   updateFail: '更新失败',
   deleting: '删除中...',
+  quit: '退出',
+  departmentPlaceholder: '请选择部门',
+  rolePlaceholder: '请选择角色',
+  remark: '备注',
+  fail: '失败'
 }
 
 export const home = {
@@ -74,13 +83,21 @@ export const owner = {
   sheetTitle: '切换语言',
   zh: '中文',
   en: '英文',
-  powerTitle: '权限管理',
-  certificate: '找回用户凭证',
+  powerTitle: '高级设置',
+  certificate: '用户凭证',
   certificateTip: '用户凭证是访问智慧中心的密钥，请选择是否允许成员通过云端找回凭证。',
+  certificateAppTitle: '智汀家庭云凭证',
+  certificateAppTip: '在成员加入家庭时发放给客户端',
   certificateTitle1: '允许找回',
-  certificateDesc1: '成员可以在任何手机/平板连接智慧中心',
+  certificateDesc1: '成员可以在任何客户端找回凭证连接智慧中心',
   certificateTitle2: '不允许找回',
-  certificateDesc2: '成员更换手机/平板或卸载APP后无法再次连接',
+  certificateDesc2: '成员可以在有凭证的客户端连接智慧中心，但卸载APP后无法再次连接',
+  certificatePanAppTitle: '智汀云盘凭证',
+  certificatePanAppTip: '在成员授权登录或登录云账户时发放给客户端',
+  panCertificateTitle1: '允许获取',
+  panCertificateDesc1: '成员可以通过登录云账号获取凭证连接智慧中心',
+  panCertificateTitle2: '不允许获取',
+  panCertificateDesc2: '成员无法通过登录云账号获取凭证连接智慧中心，只能通过授权登录获取凭证',
   certificateSetTip: '您可以到专业版-家居-智慧中心修改已选择项',
   log: '日志',
   backup: '数据备份',
@@ -100,8 +117,6 @@ export const owner = {
   backupConfirmSecTitle: '恢复备份的数据替换目前的数据，你确定要继续吗？',
   backupConfirmContent: '* 恢复需要一定时间，且恢复过程中智慧中心将暂停使用，恢复结束后可正常使用',
   backupDelSecTitle: '备份的数据删除后无法找回，你确定要继续吗？',
-  backupLocation: '备份位置：系统磁盘-系统分区',
-  backupData: '将备份以下数据：全部数据',
   backupMarkTip: '* 备份过程中智慧中心将暂停使用，备份结束后可正常使用',
   backupMarkPlaceholder: '请输入备注信息',
   backupStart: '开始备份',
@@ -116,14 +131,31 @@ export const owner = {
   backupFailReason: '失败原因',
   recoverSuccess: '恢复成功',
   recoverFail: '恢复失败',
-  protocol: '用户协议和隐私政策'
+  protocol: '用户协议和隐私政策',
+  experience: '体验中心',
+  customerManagement: '客户管理',
+  scmManagement: '供应链管理',
+  remoteHelp: '远程协助',
+  remoteHelpTips: '开启后，智汀技术人员可以远程控制您的智慧中心进行诊断和修复，是否确认开启？',
+  onRemoteHelp: '远程协助已开启',
+  offRemoteHelp: '远程协助已关闭',
+  selectFileRecovery: '选择文件恢复',
+  scheduleBackup: '计划备份',
+  backupLocation: '备份位置',
+  backupData: '备份数据',
+  allData: '全部数据',
+  internalStorage: '内部存储',
+  smartCenterData: '智慧中心数据',
+  wangpanData: '智汀云盘数据',
+  crmData: '客户管理数据',
+  scmData: '供应链管理数据',
 }
 
 export const discover = {
   title: '添加设备',
   scan: '正在扫描',
-  tip1: '1、请确保设备已连接电源，且已重置',
-  tip2: '2、第一次添加某品牌的设备时，请进入【我-支持品牌】添加该品牌',
+  tip1: '1、请确保设备已连接电源，且已连接局域网;',
+  tip2: '2、第一次添加某品牌时，请进入【我-支持品牌】添加该品牌;',
   add: '添加',
   empty: '未发现设备',
   retry: '重新扫描'
@@ -133,18 +165,20 @@ export const connect = {
   title: '设备连接',
   connect: '设备连接中',
   success: '连接成功！',
-  fail: '连接失败！',
-  retry: '重新扫描'
+  fail: '设备添加失败！',
+  retry: '重试'
 }
 
-export const areadetail = {
-  title: '家庭/公司',
+export const areaDetail = {
+  familyTitle: '家庭',
+  companyTitle: '公司',
   name: '名称',
-  area: '房间/区域',
+  area: '房间',
   code: '二维码',
+  department: '部门',
   verify: '验证码',
   role: '角色',
-  quit: '退出家庭',
+  quitFamily: '退出家庭',
   member: '成员',
   man: '人',
   sheetTitle: '家庭/公司名称',
@@ -155,6 +189,7 @@ export const areadetail = {
   roleTitle: '选择角色',
   roleTip1: '邀请码',
   roleTip2: '选择角色并生成邀请码，即可邀请好友加入，邀请码10分钟内有效',
+  roleTip3: '选择部门和角色并生成邀请码，即可邀请员工加入，邀请码10分钟内有效',
   invite: '生成邀请码',
   empty: '请输入家庭名称',
   inviteTip: '邀请码已生成，请邀请好友加入吧',
@@ -163,27 +198,30 @@ export const areadetail = {
   tapTip: '长按保存至相册',
   joinTip: '邀请您加入',
   creat: '生成',
-  effective: '验证码有效时间为10分钟'
-
+  effective: '验证码有效时间为10分钟',
+  disband: '解散公司',
+  quitCompany: '退出公司',
+  tips: '提示',
+  deleteArea: '删除数据和云盘文件需要一定时间，已为你后台运行，请到APP首页切换家庭/公司查看删除情况。'
 }
 
-export const locationmanage = {
-  title: '房间/区域管理',
+export const locationManage = {
+  title: '房间',
   edit: '编辑',
   finish: '完成',
   empty: '暂无房间',
-  add: '添加房间/区域',
-  sheetTitle: '房间/区域名称',
+  add: '添加房间',
+  sheetTitle: '房间名称',
   emptyTip: '请输入房间名称',
   repeatTip: '房间名称重复'
 }
 
-export const locationdevice = {
-  title: '房间/区域',
+export const locationDevice = {
+  title: '房间详情',
   del: '删除',
   name: '名称',
   tip: '房间设备',
-  sheetTitle: '房间/区域名称',
+  sheetTitle: '房间名称',
   delTitle: '确定删除该房间吗？',
   delContent: '删除房间，不会把房间内的设备删除',
   emptyTip: '请输入房间名称'
@@ -191,12 +229,12 @@ export const locationdevice = {
 
 export const locationsetting = {
   title: '设置',
-  add: '添加房间/区域',
+  add: '添加房间',
   tip1: '设备名称',
   placeholder: '请输入设备名称',
   tip2: '设备位置',
   finish: '完成',
-  sheetTitle: '房间/区域名称',
+  sheetTitle: '房间',
   emptyTip: '请输入房间名称',
   repeatTip: '房间名称重复',
   deviceEmpty: '请输入设备名称',
@@ -280,22 +318,26 @@ export const deviceDetail = {
   isUpdate: '是否升级'
 }
 
-export const devicemanage = {
+export const deviceManage = {
   name: '设备名称',
   position: '设备位置',
   plugin: '关联插件',
   del: '删除设备',
   delTitle: '确定删除设备吗',
   empty: '请输入设备名称',
-  modify: '修改成功'
+  modify: '修改成功',
+  changeIcon: '更换图标'
 }
 
 export const membermanage = {
   title: '成员信息',
   role: '角色',
   sheetTitle: '选择角色',
+  sheetTitle2: '选择部门',
   delTitle: '确定删除该成员吗？',
-  modify: '修改成功'
+  modify: '修改成功',
+  department: '部门',
+  undivided: '未划分'
 }
 
 export const plugindetail = {
@@ -322,16 +364,18 @@ export const register = {
   success: '认证成功'
 }
 
-export const roleadd = {
+export const roleAdd = {
   addTitle: '添加角色',
   editTitle: '编辑角色',
   placeholder: '请输入角色名称',
   label: '该角色可操作：',
   device: '设备',
   advance: '高级设置',
-  area: '家庭/公司',
+  family: '家庭',
+  company: '公司',
   selectAll: '全选',
-  location: '房间/区域',
+  room: '房间',
+  department: '部门',
   role: '角色',
   scene: '场景',
   delTitle: '确定删除吗？',
@@ -389,7 +433,7 @@ export const scene = {
   deleted: '已删除',
   offLine: '离线',
   effictiveTimeTitle: '生效时间段',
-  conditionTitle: '控制设备',
+  conditionTitle: '设备发生变化时',
 }
 
 export const creatScene = {
@@ -497,7 +541,7 @@ export const effectiveTime = {
 export const condition = {
   switch: '开关',
   brightness: '亮度',
-  temperature: '色温',
+  colorTemperature: '色温',
   hue: '色调',
   saturation: '饱和度',
   rgb: '色彩',
@@ -517,7 +561,32 @@ export const condition = {
   curtainState: '开启状态',
   curtainOpen: '打开窗帘',
   curtainClose: '关闭窗帘',
-  curtianPercent: '打开窗帘百分比'
+  curtianPercent: '打开窗帘百分比',
+  temperature: '温度',
+  humidity: '湿度',
+  isDetected: '检测到动作时',
+  offToOn: '由关闭变为打开时',
+  onToOff: '由打开变为关闭时',
+  isLeakDetected: '检测到浸水时',
+  color: '彩色',
+  firstSwitchOn: '一键打开',
+  firstSwitchOff: '一键关闭',
+  firstSwitchChange: '一键切换',
+  secondSwitchOn: '二键打开',
+  secondSwitchOff: '二键关闭',
+  secondSwitchChange: '二键切换',
+  thirdSwitchOn: '三键打开',
+  thirdSwitchOff: '三键关闭',
+  thirdSwitchChange: '三键切换',
+  guard: '守护',
+  openAtHome: '开启在家模式',
+  openLeaveHome: '开启离家模式',
+  openSleep: '开启睡眠模式',
+  closeGuard: '关闭守护模式',
+  singlePress: '单击',
+  doublePress: '双击',
+  longPress: '长按',
+  state: '状态',
 }
 
 export const transferOwner = {
@@ -528,11 +597,31 @@ export const transferOwner = {
 
 export const deviceAttr = {
   power: '开关',
-  templature: '色温',
+  colorTemperature: '色温',
   brightness: '亮度',
   hue: '色调',
   saturation: '饱和度',
-  rgb: '色彩'
+  rgb: '彩色',
+  temperature: '温度',
+  humidity: '湿度',
+  detected: '状态',
+  windowDoorClose: '状态',
+  leakDetected: '状态',
+  targetState: '守护',
+  powers1: '一键',
+  powers2: '二键',
+  powers3: '三键',
+  curtainState: '窗帘状态',
+  state: '状态',
+  style: '样式',
+  direction: '方向',
+  calibration: '校准',
+  switchEvent: '开关',
+  onOff: '开关',
+  volume: '音量',
+  contactSensorState: '状态',
+  motionDetected: '状态',
+  statusLowBattery: ' 低电量状态',
 }
 
 export const protocol = {
@@ -541,4 +630,57 @@ export const protocol = {
   userAgreement: '用户协议',
   agreementTitle: '用户协议',
   privacyTitle: '隐私政策'
+}
+
+export const departmentManage = {
+  title: '部门',
+  edit: '编辑',
+  finish: '完成',
+  empty: '暂无部门',
+  add: '添加部门',
+  sheetTitle: '部门名称',
+  emptyTip: '请输入部门名称',
+  repeatTip: '部门名称重复',
+  man: '人'
+}
+
+export const departmentDetail = {
+  title: '部门',
+  empty: '暂无成员',
+  add: '添加成员',
+  member: '成员',
+  man: '人',
+  set: '部门设置',
+  emptyTip: '请选择要添加的成员',
+}
+
+export const departmentSetting = {
+  title: '部门设置',
+  deleteDepartment: '删除部门',
+  departmentName: '部门名称',
+  departmentHead: '部门主管',
+  nameEmpty: '请设置部门名称',
+  quitTip: '信息未保存，是否退出？',
+  delTitle: '确定删除该部门吗？',
+  delContent: '删除部门，不会把成员删除!'
+}
+
+export const experienceCenter = {
+  title: '体验中心'
+}
+
+export const resourceMonitoring = {
+  title: '资源监控',
+  CPUutilization: 'CPU使用率',
+  RAMutilization: '内存使用率',
+  service: '服务',
+  basiServices: '智慧中心基础服务',
+  pluginServices: '插件服务',
+  extensionServices: '扩展服务',
+  day: '天',
+  reStart: '重启',
+  isReStart: '正在重启...',
+  reStartFail: '重启失败',
+  isStarted: '已启动',
+
 }

@@ -23,8 +23,8 @@
         </div>
         <p v-if="isScan" class="scan-word">{{ $t('discover.scan') }}...</p>
         <p v-else class="scan-word">{{ $t('discover.empty') }}</p>
-        <p class="scan-tip">1.{{ $t('discover.tip1') }}</p>
-        <p class="scan-tip">2.{{ $t('discover.tip2') }}</p>
+        <p class="scan-tip">{{ $t('discover.tip1') }}</p>
+        <p class="scan-tip">{{ $t('discover.tip2') }}</p>
         <div v-show="!isScan" class="scan-btn--box">
           <button class="scan-btn" @click="scanDevice">{{ $t('discover.retry') }}</button>
         </div>
@@ -79,7 +79,6 @@ export default {
       // 发送发现指令
       this.msgId = Date.now()
       this.websocket.send({
-        domain: 'plugin',
         id: this.msgId,
         service: 'discover'
       })
@@ -87,11 +86,11 @@ export default {
       this.websocket.onmessage((data) => {
         const msg = JSON.parse(data)
         if (msg.id === this.msgId) {
-          if (!msg.result) {
+          if (!msg.data) {
             return
           }
-          const { device } = msg.result
-          const isExist = this.discoverList.find(item => item.identity === device.identity)
+          const { device } = msg.data
+          const isExist = this.discoverList.find(item => item.iid === device.iid)
           if (!isExist) {
             clearTimeout(this.timer)
             this.discoverList.push(device)
@@ -113,7 +112,7 @@ export default {
       }
       const query = Object.assign({}, device)
       query.area_id = this.areaId
-      if (device.plugin_id === 'homekit') {
+      if (device.auth_required) {
         this.$router.push({
           name: 'homeKit',
           query
@@ -125,37 +124,6 @@ export default {
         })
       }
     },
-    // 获取是否进行home-kit码匹配
-    matchCode(deviceInfo) {
-      // 发送发现指令
-      this.msgId = Date.now()
-      this.websocket.send({
-        domain: 'homekit',
-        id: this.msgId,
-        identity: deviceInfo.identity,
-        service: 'get_attributes'
-      })
-      // 接受消息
-      this.websocket.onmessage((data) => {
-        const msg = JSON.parse(data)
-        if (msg.id === this.msgId) {
-          if (!msg.result && msg.error === 'record not found') {
-            setTimeout(() => {
-              this.$router.replace({
-                name: 'homeKit',
-                query: deviceInfo
-              })
-            }, 1000)
-          } else {
-            // 跳转至设备详情页
-            this.$router.push({
-              name: 'deviceConnect',
-              query: deviceInfo
-            })
-          }
-        }
-      })
-    }
   },
   created() {
     const { areaId } = this.$route.query

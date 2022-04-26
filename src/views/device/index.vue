@@ -40,6 +40,22 @@
       @scroll="handleScroll"
       @change="handleTabChange"
       class="position">
+      <div class="set-box" v-if="false">
+        <div v-if="layoutMenuValue === 'square'" class="set-item" @click="tabMenuType('list')">
+          <img :src="squareMenu" />
+        </div>
+        <div v-else class="set-item" @click="tabMenuType('square')">
+          <img :src="listMenu" />
+        </div>
+        <div class="set-item select-set" @click="showSelect = !showSelect">
+          <img :src="setMenu" />
+        </div>
+        <div class="select-box" v-if="showSelect">
+          <ul>
+            <li v-for="(item,index) in setList" :key="index"><a href="javascript:;"><img :src="item.icon" alt=""><span>{{item.name}}</span></a></li>
+          </ul>
+        </div>
+      </div>
       <van-tab
         v-for="location in locationList"
         :key="location.id"
@@ -56,45 +72,106 @@
           </van-loading>
         </div>
         <!--设备列表-->
-        <div v-else-if="hasDevice" class="device-list">
-          <div
-            v-for="device in deviceList"
-            :key="device.id"
-            class="device-item"
-            @click="toDeviceDetail(device)">
-            <div class="clearfix" :class="{ 'outline': !device.isOnline }">
-              <span class="device-item--name one-line float-l">
-                {{ device.name }}
-              </span>
-              <span v-if="!device.isOnline" class="device-item--outline float-l">{{ $t('home.offline') }}</span>
-            </div>
-            <div class="device-row">
-              <CommonImage
-                class="device-item--img"
-                fit="contain"
-                :src="device.logo_url"/>
+        <template v-else-if="hasDevice">
+          <!--layoutMenuValue === 'list'-->
+          <div class="device-list list" v-if="false">
+            <div
+              v-for="device in deviceList"
+              :key="device.id"
+              class="device-item"
+              @click="toDeviceDetail(device)">
+              <CommonImage class="device-item--img" fit="contain" :src="device.logo_url"/>
+              <div class="device-row one-line">
+                <div class="clearfix " :class="{ 'outline': !device.isOnline }">
+                  <span class="device-item--name one-line float-l">{{ device.name }}</span>
+                  <span v-if="!device.isOnline" class="device-item--outline float-l">{{ $t('home.offline') }}</span>
+                </div>
+                <div v-if="device.switch_list&&device.switch_list.length>0" class="device-state">
+                  <span v-for="(power,index) in device.switch_list" :key="index">{{power.val==='on' || power.val=== 1?'开':'关'}} <span class="line">|</span></span>
+                </div>
+                <div v-if="(device.type=== 'temperature_humidity_sensor' && device.temperature !=='') || (device.type=== 'temperature_humidity_sensor' && device.humidity !== '')" class="device-state">
+                  <template v-if="device.isOnline">{{device.temperature}}℃ | {{device.humidity}}%</template>
+                </div>
+                <div v-if="device.type=== 'contact_sensor'" class="device-state">
+                  <span v-if="device.isOnline" :class="{'primary': device.power}">{{device.power?'已打开':'已关闭'}}</span>
+                </div>
+                <div v-if="device.type=== 'motion_sensor'" class="device-state">
+                  <span v-if="device.isOnline" class="danger">{{device.power?'有人移动':''}}</span>
+                </div>
+                <div v-if="device.type=== 'leak_sensor'" class="device-state">
+                  <span v-if="device.isOnline" :class="{'danger': device.power}">{{device.power?'检测水浸':'检测无水'}}</span>
+                </div>
+              </div>
               <button
-                v-if="!device.is_sa && device.hasPermission"
+                v-if="(!device.is_sa && device.hasPermission)"
                 class="device-btn"
                 :class="[device.power ? 'device-btn--on' : 'device-btn--off']"
                 @click.stop="operateDevice(device)"></button>
-              <div v-else class="device-switch">
-                <span v-for="(power,index) in device.switch_list" :key="index">{{power.val==='on'?'开':'关'}} <span class="line">|</span></span>
+            </div>
+            <div
+              v-if="permissions.add_device"
+              class="device-item"
+              @click="discover">
+              <div class="add-btn">
+                <van-icon
+                  name="plus"
+                  size="0.4rem"
+                  color="#94a5be"/>
               </div>
-              </div>
-          </div>
-          <div
-            v-if="permissions.add_device"
-            class="device-item"
-            @click="discover">
-            <div class="add-btn">
-              <van-icon
-                name="plus"
-                size="0.4rem"
-                color="#ffffff"/>
             </div>
           </div>
-        </div>
+          <div class="device-list square">
+            <div
+              v-for="device in deviceList"
+              :key="device.id"
+              class="device-item"
+              @click="toDeviceDetail(device)">
+              <div class="clearfix" :class="{ 'outline': !device.isOnline }">
+              <span class="device-item--name one-line float-l">
+                {{ device.name }}
+              </span>
+                <span v-if="!device.isOnline" class="device-item--outline float-l">{{ $t('home.offline') }}</span>
+              </div>
+              <div class="device-row">
+                <CommonImage
+                  class="device-item--img"
+                  fit="contain"
+                  :src="device.logo_url"/>
+                <button
+                  v-if="(!device.is_sa && device.hasPermission)"
+                  class="device-btn"
+                  :class="[device.power ? 'device-btn--on' : 'device-btn--off']"
+                  @click.stop="operateDevice(device)"></button>
+                <div v-if="device.switch_list&&device.switch_list.length>0" class="device-state">
+                  <span v-for="(power,index) in device.switch_list" :key="index">{{power.val==='on' || power.val=== 1?'开':'关'}} <span class="line">|</span></span>
+                </div>
+                <div v-if="(device.type=== 'temperature_humidity_sensor' && device.temperature !=='') || (device.type=== 'temperature_humidity_sensor' && device.humidity !== '')" class="device-state">
+                  <template v-if="device.isOnline">{{device.temperature}}℃ | {{device.humidity}}%</template>
+                </div>
+                <div v-if="device.type=== 'contact_sensor'" class="device-state">
+                  <span v-if="device.isOnline" :class="{'primary': device.power}">{{device.power?'已打开':'已关闭'}}</span>
+                </div>
+                <div v-if="device.type=== 'motion_sensor'" class="device-state">
+                  <span v-if="device.isOnline" class="danger">{{device.power?'有人移动':''}}</span>
+                </div>
+                <div v-if="device.type=== 'leak_sensor'" class="device-state">
+                  <span v-if="device.isOnline" :class="{'danger': device.power}">{{device.power?'检测水浸':'检测无水'}}</span>
+                </div>
+              </div>
+            </div>
+            <div
+              v-if="permissions.add_device"
+              class="device-item"
+              @click="discover">
+              <div class="add-btn">
+                <van-icon
+                  name="plus"
+                  size="0.4rem"
+                  color="#ffffff"/>
+              </div>
+            </div>
+          </div>
+        </template>
         <!--没有设备提示-->
         <div v-else class="device-empty">
           <div class="empty-box">
@@ -112,10 +189,23 @@
 <script>
 import { mapGetters } from 'vuex'
 
+const squareMenu = require('../../assets/icon-square-menu.png')
+const listMenu = require('../../assets/icon-list-menu.png')
+const setMenu = require('../../assets/icon-set.png')
+const homeIcon = require('../../assets/icon-home.png.png')
+const closeEyeIcon = require('../../assets/icon-close-eye.png')
+const openEyeIcon = require('../../assets/icon-open-eye.png')
+const equalizerIcon = require('../../assets/icon-equalizer.png')
+const layersIcon = require('../../assets/icon-layers.png')
+
 export default {
   name: 'device',
   data() {
     return {
+      squareMenu,
+      listMenu,
+      setMenu,
+      layoutMenuValue: 'square',
       activeLocation: -1, // 当前选中房间
       activeArea: '', // 当前选中家庭
       tabBgColor: 'transparent',
@@ -127,13 +217,23 @@ export default {
       isWeak: false,
       position: 0,
       switchList: [],
+      showSelect: false,
+      setList: [
+        { name: '房间管理', icon: homeIcon },
+        { name: '设备排序', icon: layersIcon },
+        { name: '隐藏离线设备', icon: closeEyeIcon },
+        { name: '显示所有设备', icon: openEyeIcon },
+        { name: '常用设备设置', icon: equalizerIcon }
+      ]
     }
   },
   computed: {
-    ...mapGetters(['websocket', 'area', 'permissions']),
+    ...mapGetters(['websocket', 'userInfo', 'area', 'permissions']),
     hasDevice() {
       return this.deviceList.length
     }
+  },
+  watch: {
   },
   methods: {
     // 处理吸顶
@@ -150,21 +250,39 @@ export default {
         return
       }
       this.loading = true
-      this.http.getLocations().then((res) => {
-        this.loading = false
-        if (res.status !== 0) {
-          return
-        }
-        const all = {
-          id: -1,
-          name: this.$t('global.all')
-        }
-        const { locations } = res.data
-        this.locationList = locations || []
-        this.locationList.unshift(all)
-      }).catch(() => {
-        this.loading = false
-      })
+      if (this.userInfo.area_type === 1) {
+        this.http.getLocations().then((res) => {
+          this.loading = false
+          if (res.status !== 0) {
+            return
+          }
+          const all = {
+            id: -1,
+            name: this.$t('global.all')
+          }
+          const { locations } = res.data
+          this.locationList = locations || []
+          this.locationList.unshift(all)
+        }).catch(() => {
+          this.loading = false
+        })
+      } else {
+        this.http.departmentsList().then((res) => {
+          this.loading = false
+          if (res.status !== 0) {
+            return
+          }
+          const all = {
+            id: -1,
+            name: this.$t('global.all')
+          }
+          const { departments } = res.data
+          this.locationList = departments || []
+          this.locationList.unshift(all)
+        }).catch(() => {
+          this.loading = false
+        })
+      }
     },
     // 初始设备列表
     initList() {
@@ -180,6 +298,8 @@ export default {
           item.isOnline = true
           item.power = false
           item.hasPermission = false
+          item.temperature = ''
+          item.humidity = ''
         })
         this.allDeviceList = devices
         this.initLocationDevice(this.activeLocation)
@@ -227,8 +347,10 @@ export default {
       this.websocket.send({
         id: device.stateId,
         domain: device.plugin_id,
-        service: 'get_attributes',
-        identity: device.identity
+        service: 'get_instances',
+        data: {
+          iid: device.iid
+        }
       })
     },
     // 发送操作指令
@@ -237,12 +359,11 @@ export default {
         id: 1,
         domain: device.plugin_id,
         service: 'set_attributes',
-        identity: device.identity,
-        service_data: {
+        data: {
           attributes: [
             {
-              attribute: 'power',
-              instance_id: device.instance_id,
+              iid: device.iid,
+              aid: device.aid,
               val
             }
           ]
@@ -291,49 +412,180 @@ export default {
     },
     handleMessage(data) {
       const msgJson = JSON.parse(data)
-      this.deviceList.forEach((device) => {
-        // 初始化设备信息
-        if (msgJson.id && msgJson.id === device.stateId) {
-          if (!msgJson.success) {
-            device.isOnline = false
-          } else {
-            const { instances } = msgJson.result.device
-            const types = ['light_bulb', 'outlet', 'switch']
-            const operation = instances.find(instance => types.includes(instance.type))
-            const { attributes } = operation
-            device.instance_id = operation.instance_id
-            device.isOnline = true
-            if (operation.type === 'switch' && attributes.length > 1) {
-              device.switch_list = []
-              attributes.forEach((attr) => {
-                if (attr.attribute === 'power') {
-                  attr.power = attr.val === 'on'
-                  // 权限控制
-                  attr.hasPermission = attr.can_control
-                  device.switch_list.push(attr)
-                }
-              })
+      if (!msgJson.event_type) {
+        this.deviceList.forEach((device) => {
+          // 初始化设备信息
+          if (msgJson.id && msgJson.id === device.stateId) {
+            if (!msgJson.success) {
+              device.isOnline = false
             } else {
-              attributes.forEach((attr) => {
-                if (attr.attribute === 'power') {
-                  device.power = attr.val === 'on'
-                  // 权限控制
-                  device.hasPermission = attr.can_control
+              const { instances } = msgJson.data
+              const types = ['light_bulb', 'bulb', 'outlet', 'wall_plug', 'switch', 'gateway', 'security_system', 'leak_sensor', 'contact_sensor', 'motion_sensor', 'temperature_sensor', 'humidity_sensor']
+              const temperatureType = ['temperature_sensor']
+              const humidityType = ['humidity_sensor']
+              const instanceType = instances.find(instance => instance.iid === device.iid)
+              const operation = instanceType.services.find(service => types.includes(service.type)) || {}
+              const temOperation = instanceType.services.find(service => temperatureType.includes(service.type)) || {}
+              const humOperation = instanceType.services.find(service => humidityType.includes(service.type)) || {}
+              const { attributes } = operation || []
+              device.isOnline = true
+              if (operation.type === 'temperature_sensor' || operation.type === 'humidity_sensor') {
+                device.type = 'temperature_humidity_sensor'
+              } else {
+                device.type = operation.type
+              }
+              if (operation.type === 'light_bulb' || operation.type === 'outlet' || operation.type === 'bulb' || operation.type === 'wall_plug') {
+                attributes.forEach((attr) => {
+                  if (attr.type === 'on_off') {
+                    device.aid = attr.aid
+                    if (attr.val === 'on' || attr.val === 1) {
+                      device.power = true
+                    } else {
+                      device.power = false
+                    }
+                    // 权限控制
+                    device.hasPermission = this.$methods.formatPermission(attr.permission)
+                  }
+                })
+              }
+              if (operation.type === 'switch') {
+                const switchOperation = instanceType.services.filter(service => service.type === 'switch') || []
+                if (switchOperation.length > 1) {
+                  device.switch_list = []
+                  switchOperation.forEach((item) => {
+                    item.attributes.forEach((attr) => {
+                      if (attr.type === 'on_off') {
+                        if (attr.val === 'on' || attr.val === 1) {
+                          attr.power = true
+                        } else {
+                          attr.power = false
+                        }
+                        // 权限控制
+                        attr.hasPermission = this.$methods.formatPermission(attr.permission)
+                        device.switch_list.push(attr)
+                      }
+                    })
+                  })
+                } else {
+                  attributes.forEach((attr) => {
+                    if (attr.type === 'on_off') {
+                      device.aid = attr.aid
+                      if (attr.val === 'on' || attr.val === 1) {
+                        device.power = true
+                      } else {
+                        device.power = false
+                      }
+                      // 权限控制
+                      device.hasPermission = this.$methods.formatPermission(attr.permission)
+                    }
+                  })
                 }
-              })
+              }
+              if (operation.type === 'contact_sensor') {
+                attributes.forEach((attr) => {
+                  if (attr.type === 'contact_sensor_state') {
+                    device.aid = attr.aid
+                    device.power = !!attr.val
+                  }
+                })
+              }
+              if (operation.type === 'motion_sensor') {
+                attributes.forEach((attr) => {
+                  if (attr.type === 'motion_detected') {
+                    device.aid = attr.aid
+                    device.power = attr.val
+                  }
+                })
+              }
+              if (operation.type === 'leak_sensor') {
+                attributes.forEach((attr) => {
+                  if (attr.type === 'leak_detected') {
+                    device.aid = attr.aid
+                    device.power = !!attr.val
+                  }
+                })
+              }
+              if (device.type === 'temperature_humidity_sensor') {
+                if (temOperation.attributes) {
+                  temOperation.attributes.forEach((attr) => {
+                    if (attr.type === 'temperature') {
+                      device.temperature = attr.val
+                      device.temperature_aid = attr.aid
+                    }
+                  })
+                }
+                if (humOperation.attributes) {
+                  humOperation.attributes.forEach((attr) => {
+                    if (attr.type === 'humidity') {
+                      device.humidity_aid = attr.aid
+                      device.humidity_max = attr.max
+                      device.humidity_min = attr.min
+                      device.humidity = this.getPercent(attr.max, attr.min, attr.val)
+                    }
+                  })
+                }
+              }
             }
           }
-        }
-      })
+        })
+      }
       // 设备状态变化
       if (msgJson.event_type && msgJson.event_type === 'attribute_change') {
         const { data: changeData } = msgJson
         // 更新设备状态
         this.deviceList.forEach((device) => {
-          if (changeData.identity === device.identity) {
-            const { attr } = changeData
-            if (attr.attribute === 'power') {
-              device.power = attr.val === 'on'
+          const { attr } = changeData
+          if (attr.iid === device.iid) {
+            if (device.type === 'temperature_humidity_sensor') {
+              if (attr.aid === device.humidity_aid) {
+                device.humidity = this.getPercent(device.humidity_max, device.humidity_min, attr.val)
+              }
+              if (attr.aid === device.temperature_aid) {
+                device.temperature = attr.val
+              }
+            }
+            if (device.type === 'light_bulb' || device.type === 'outlet' || device.type === 'bulb' || device.type === 'wall_plug') {
+              if (attr.aid === device.aid) {
+                if (attr.val === 'on' || attr.val === 1) {
+                  device.power = true
+                } else {
+                  device.power = false
+                }
+              }
+            }
+            if (device.type === 'switch') {
+              if (device.switch_list) {
+                device.switch_list.forEach((item) => {
+                  if (item.aid === attr.aid) {
+                    if (attr.val === 'on' || attr.val === 1) {
+                      item.val = 'on'
+                    } else {
+                      item.val = 'off'
+                    }
+                  }
+                })
+              } else if (attr.aid === device.aid) {
+                if (attr.val === 'on' || attr.val === 1) {
+                  device.power = true
+                } else {
+                  device.power = false
+                }
+              }
+            }
+            if (device.type === 'contact_sensor') {
+              if (attr.aid === device.aid) {
+                device.power = !!attr.val
+              }
+            }
+            if (device.type === 'motion_sensor') {
+              if (attr.aid === device.aid) {
+                device.power = attr.val
+              }
+            }
+            if (device.type === 'leak_sensor') {
+              if (attr.aid === device.aid) {
+                device.power = !!attr.val
+              }
             }
           }
         })
@@ -365,12 +617,41 @@ export default {
     // 获取滚动条与顶端距离
     scroll(event) {
       this.position = event.target.scrollTop
+    },
+    // 获取百分比
+    getPercent(max, min, value) {
+      let res = Math.round(Number(((value - min) / (max - min)) * 100))
+      if (res < 0) {
+        res = 0
+      }
+      return res
+    },
+    // 切换列表模式还是方块模式
+    tabMenuType(type) {
+      this.$methods.setStore('layoutMenuValue', type)
+      this.layoutMenuValue = type
+    },
+    isShowSelect(e) {
+      if (document.querySelector('.select-set')) {
+        if (!document.querySelector('.select-set').contains(e.target)) {
+          if (this.showSelect) {
+            this.showSelect = false
+          }
+        }
+      }
     }
   },
   created() {
     const { query } = this.$route
     if (query.locationId) {
       this.activeLocation = Number(query.locationId)
+    }
+    if (this.$methods.getStore('layoutMenuValue')) {
+      if (this.$methods.getStore('layoutMenuValue') === 'list') {
+        this.layoutMenuValue = 'list'
+      } else if (this.$methods.getStore('layoutMenuValue') === 'square') {
+        this.layoutMenuValue = 'square'
+      }
     }
     // 初始化当前家庭设备
     this.initList()
@@ -394,7 +675,13 @@ export default {
           this.$router.replace({ path, query: newQuery })
         }
       }, 500)
+      document.addEventListener('click', (e) => {
+        this.isShowSelect(e)
+      })
     })
+  },
+  destroyed() {
+    document.addEventListener('click', e => this.isShowSelect(e))
   }
 }
 </script>
@@ -402,6 +689,12 @@ export default {
 .mgl25 {
   margin-left: 0.25rem;
   vertical-align: middle;
+}
+.danger{
+  color: #FF7F7F;
+}
+.primary{
+  color: #2da3f6;
 }
 .device {
   height: calc(100vh - 1rem);
@@ -453,7 +746,6 @@ export default {
   border-radius: 0.2rem;
   margin-top: 0.3rem;
   margin-left: 0.3rem;
-  text-align: center;
 }
 .device-row {
   position: relative;
@@ -491,7 +783,7 @@ export default {
   text-align: center;
   line-height: 0.32rem;
 }
-.device-btn,.device-switch {
+.device-btn,.device-state {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -501,16 +793,16 @@ export default {
   background-size: 100% 100%;
   border: 0;
 }
-.device-switch{
+.device-state{
   color: #94A5BE;
   font-size: .2rem;
   width: auto;
   height: auto;
 }
-.device-switch .line{
+.device-state .line{
   margin: 0 .05rem;
 }
-.device-switch span:last-of-type .line{
+.device-state span:last-of-type .line{
   display: none;
 }
 .device-btn--on {
@@ -533,6 +825,60 @@ export default {
   background: #DDE5EB;
   border-radius: 50%;
 }
+
+.device-list.list{
+  padding: 0 .3rem .4rem .3rem;
+}
+.device-list.list .device-item{
+  width: 100%;
+  height: auto;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+}
+.device-list.list .device-item--img{
+  position: relative;
+  margin-right: .2rem;
+  width: 1rem;
+  height: 1rem;
+}
+.device-list.list .device-item--name{
+  margin-bottom: 0;
+}
+.device-list.list .device-row{
+  flex: 1;
+  height: auto;
+}
+.device-list.list .device-state{
+  position: relative;
+  margin-top: .25rem;
+}
+.device-list.list .device-btn {
+  position: relative;
+}
+.device-list.list .add-btn{
+  position: relative;
+  background: transparent;
+}
+
+.set-box{
+  padding-left: .3rem;
+  height: .88rem;
+  position: absolute;
+  right: .2rem;
+  top: 0;
+  display: flex;
+  align-items: center;
+  .set-item {
+    padding: .1rem .15rem;
+    cursor: pointer;
+  }
+  img{
+    width: .32rem;
+    height: .32rem;
+  }
+}
+
 .device-empty,
 .empty-area {
   display: flex;
@@ -595,12 +941,43 @@ export default {
 .name {
   max-width: 6rem;
 }
+.select-box{
+  width: 3.5rem;
+  position: absolute;
+  top: 46px;
+  right: .3rem;
+  background: #3F4663;
+  box-shadow: 0px 0px .2rem 0px rgba(0, 0, 0, 0.1);
+  border-radius: .2rem;
+  z-index: 999;
+  overflow: hidden;
+}
+.select-box li a{
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  color: #FFFFFF;
+  padding: .3rem .3rem;
+  border-bottom: 1px solid rgba(148, 165, 190, .2);
+}
+.select-box li:last-of-type a{
+  border-bottom: 0 none;
+}
+.select-box li a img{
+  margin-right: .3rem;
+  height: auto;
+  width: .35rem;
+}
 </style>
 <style scoped>
 .device >>> .van-tab__text {
   font-size: 0.32rem;
   font-weight: bold;
 }
+/*.device >>> .van-tabs__wrap {*/
+/*  padding-right: 1.5rem;*/
+/*  background: #FFFFFF;*/
+/*}*/
 .device >>> .van-tab {
   padding: 0 0.32rem;
   flex: 0 0 auto;

@@ -1,8 +1,0 @@
-{
-  "brand": "yeelight", // 插件品牌名称
-  "brand_id": "yeelingt", // 插件品牌id
-  "version": "v1.0.0", // 插件版本号
-  "plugin_name": "Yeelight易来 韶华LED吸顶灯星空款YLXD60YL-A", // 插件名称
-  "plugin_id": "yeelingt_led", // 插件id
-  "plugin_pic": "https://www.dd/fd.png" // 插件图片地址
-}

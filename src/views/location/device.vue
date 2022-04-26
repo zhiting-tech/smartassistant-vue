@@ -1,7 +1,7 @@
 <template>
    <div class="wrapper">
     <van-nav-bar
-      :title="$t('locationdevice.title')"
+      :title="$t('locationDevice.title')"
       left-arrow
       :fixed="true"
       :placeholder="true"
@@ -11,7 +11,7 @@
         <van-icon name="arrow-left" color="#3F4663"/>
       </template>
       <template #right v-if="permissions.delete_location">
-        <span class="nav-right">{{ $t('locationdevice.del') }}</span>
+        <span class="nav-right">{{ $t('locationDevice.del') }}</span>
       </template>
     </van-nav-bar>
     <!--loading模块-->
@@ -19,7 +19,7 @@
     <template v-else>
     <div class="detail-box">
       <div class="item clearfix" @click="permissions.update_location_name?show = true:''">
-        <span class="item__label one-line float-l">{{ $t('locationdevice.name') }}</span>
+        <span class="item__label one-line float-l">{{ $t('locationDevice.name') }}</span>
         <span class="item__name float-r">
           {{ name }}
           <van-icon name="arrow" class="item__icon"/>
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div v-show="deviceList.length" class="device-list clearfix">
-      <p class="device-tip">{{ $t('locationdevice.tip') }}</p>
+      <p class="device-tip">{{ $t('locationDevice.tip') }}</p>
       <div
         v-for="device in deviceList"
         :key="device.id"
@@ -44,7 +44,7 @@
     <!--修改名称弹窗-->
     <NameSheet
       v-model="show"
-      :title="$t('locationdevice.sheetTitle')"
+      :title="$t('locationDevice.sheetTitle')"
       :init="name"
       :loading="nameLoading"
       @on-confirm="editRoomName"/>
@@ -55,8 +55,8 @@
       :before-close="deleteRoom"
       confirm-button-color="#2DA3F6"
       cancel-button-color="#94A5BE">
-      <h3 class="delete-title">{{ $t('locationdevice.delTitle') }}</h3>
-      <p class="delete-tip">{{ $t('locationdevice.delContent') }}</p>
+      <h3 class="delete-title">{{ $t('locationDevice.delTitle') }}</h3>
+      <p class="delete-tip">{{ $t('locationDevice.delContent') }}</p>
     </van-dialog>
    </div>
 </template>
@@ -120,7 +120,7 @@ export default {
     editRoomName(name) {
       const room = name.trim()
       if (room === '') {
-        this.$toast(this.$t('locationdevice.emptyTip'))
+        this.$toast(this.$t('locationDevice.emptyTip'))
         return
       }
       const params = {

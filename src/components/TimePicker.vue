@@ -24,6 +24,7 @@
       </div>
       <div class="picker-box">
         <van-picker
+          type="datetime"
           ref="picker"
           visible-item-count="5"
           :columns="columns"
@@ -43,7 +44,7 @@
 </template>
 <script>
 export default {
-  name: 'teimPicker',
+  name: 'timePicker',
   props: {
     value: {
       type: Boolean,

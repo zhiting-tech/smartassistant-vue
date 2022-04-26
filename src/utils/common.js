@@ -179,5 +179,14 @@ export default {
       res = 0
     }
     return res
+  },
+
+  /**
+   * 判断是否具备写的权限
+   * @param { val } val 由0/1/2/4随意相加组合的和，如果存在2证明有权限
+   */
+  formatPermission(val) {
+    const permission = [2, 3, 6, 7]
+    return permission.includes(val)
   }
 }

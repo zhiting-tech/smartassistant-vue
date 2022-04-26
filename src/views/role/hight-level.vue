@@ -3,10 +3,11 @@
     <van-action-sheet
       v-model="show"
       :round="false"
+      @open="getData"
       :closeable="false">
       <div class="role-wrap">
         <van-nav-bar
-          :title="$t('roleadd.advanceTitle')"
+          :title="$t('roleAdd.advanceTitle')"
           left-arrow
           :fixed="true"
           :placeholder="true">
@@ -17,10 +18,40 @@
             <span @click.stop="deleteRole" class="sure-btn">{{ $t('global.confirm') }}</span>
           </template>
         </van-nav-bar>
-        <div class="role-box">
+        <div class="role-box" v-if="userInfo.area_type === 2">
           <div
-            v-for="area in areas"
-            :key="area.id"
+            v-for="(department,index) in departmentsList"
+            :key="index"
+            class="room-part">
+            <h2 class="room-title">{{ department.name }}</h2>
+            <div
+              v-for="device in department.devices"
+              :key="device.id"
+              class="role-part">
+              <div class="role-top clearfix">
+                <h3 class="float-l">{{ device.name }}</h3>
+                <p
+                  @click="selectAll(device)"
+                  class="float-r"
+                  :class="[wichClass(device)]">
+                  {{ $t('roleAdd.selectAll') }}
+                </p>
+              </div>
+              <div class="role-list">
+                <div
+                  v-for="item in device.permissions"
+                  :key="item.permission.name"
+                  class="role-item one-line"
+                  :class="{ 'active': item.allow }"
+                  @click="selectSingle(item)">{{ getPerName(item.permission.name) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="role-box" v-else>
+          <div
+            v-for="(area,index) in areas"
+            :key="index"
             class="room-part">
             <h2 class="room-title">{{ area.name }}</h2>
             <div
@@ -33,7 +64,7 @@
                   @click="selectAll(device)"
                   class="float-r"
                   :class="[wichClass(device)]">
-                  {{ $t('roleadd.selectAll') }}
+                  {{ $t('roleAdd.selectAll') }}
                 </p>
               </div>
               <div class="role-list">
@@ -52,6 +83,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import { getAttr } from '@/config/deviceAttr'
 
 export default {
@@ -72,8 +104,12 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['userInfo']),
     areas() {
       return this.info.locations || []
+    },
+    departmentsList() {
+      return this.info.departments || []
     }
   },
   watch: {
@@ -121,7 +157,8 @@ export default {
           temp.allow = true
         }
       })
-    }
+    },
+    getData() {}
   }
 }
 </script>
@@ -192,10 +229,11 @@ export default {
 .role-list {
   display: flex;
   flex-wrap: wrap;
+  margin: 0 -2.15%;
 }
 .role-item {
   padding: 0 0.1rem;
-  width: 2rem;
+  width: 29%;
   height: 0.6rem;
   background: #fff;
   border: 0.01rem solid #ddd;
@@ -204,8 +242,7 @@ export default {
   color: #94A5BE;
   text-align: center;
   line-height: 0.6rem;
-  margin-top: 0.3rem;
-  margin-right: 0.44rem;
+  margin: 0.15rem 2.15%;
 }
 .role-item:nth-child(3n) {
   margin-right: 0;

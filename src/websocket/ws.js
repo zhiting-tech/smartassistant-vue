@@ -226,7 +226,7 @@ class Socket {
   */
   onclose(callback) {
     this.ws.onclose = (event) => {
-      console.error('ws关闭', event)
+      // console.error('ws关闭', event)
       this.heart.reset()
       // 看下是否需要重连，销毁不需要重连
       if (!this.OPTIONS.isRestroy) {

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Device from './views/device/index.vue'
 import DeviceDetail from './views/device/detail.vue'
+import DeviceResourse from './views/device/resourse.vue'
 import DeviceManage from './views/device/manage.vue'
 import DeviceDiscover from './views/device/discover.vue'
 import DeviceConnect from './views/device/connect.vue'
@@ -40,12 +41,26 @@ import TransferOwner from './views/user/transfer-owner.vue'
 import Log from './views/owner/log.vue'
 import Backup from './views/owner/backup.vue'
 import BackupMark from './views/owner/backup-mark.vue'
-import SoftwareUpgrade from './views/device/software-upgrade.vue'
+import BackupLocation from './views/owner/backup-location.vue'
+import Recovery from './views/owner/recovery.vue'
+import Upgrade from './views/device/upgrade.vue'
 import Protocol from './views/protocol/index.vue'
 import ProtocolUser from './views/protocol/user.vue'
 import ProtocolPrivacy from './views/protocol/privacy.vue'
+import DepartmentManage from './views/department/manage.vue'
+import DepartmentDetail from './views/department/detail.vue'
+import DepartmentSetting from './views/department/setting.vue'
+import ExperienceCenter from './views/experience-center/index.vue'
+import OutLineHelp from './views/help/out-line.vue'
+import OfflineHelp from './views/help/offline-help.vue'
+import ChangeIcon from './views/device/change-icon.vue'
 
 Vue.use(Router)
+
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 export default new Router({
   mode: 'hash',
@@ -60,6 +75,11 @@ export default new Router({
       path: '/device/detail',
       name: 'deviceDetail',
       component: DeviceDetail
+    },
+    {
+      path: '/device/resourse',
+      name: 'deviceResourse',
+      component: DeviceResourse
     },
     {
       path: '/device/manage',
@@ -77,9 +97,9 @@ export default new Router({
       component: DeviceConnect
     },
     {
-      path: '/device/software-upgrade',
-      name: 'softwareUpgrade',
-      component: SoftwareUpgrade
+      path: '/device/upgrade',
+      name: 'upgrade',
+      component: Upgrade
     },
     {
       path: '/owner',
@@ -110,6 +130,16 @@ export default new Router({
       path: '/owner/backup-mark',
       name: 'backupMark',
       component: BackupMark
+    },
+    {
+      path: '/owner/backup-location',
+      name: 'backupLocation',
+      component: BackupLocation
+    },
+    {
+      path: '/owner/recovery',
+      name: 'recovery',
+      component: Recovery
     },
     {
       path: '/brand/support',
@@ -270,6 +300,41 @@ export default new Router({
       path: '/protocol/privacy',
       name: 'protocolPrivacy',
       component: ProtocolPrivacy
+    },
+    {
+      path: '/department/manage',
+      name: 'departmentManage',
+      component: DepartmentManage
+    },
+    {
+      path: '/department/detail',
+      name: 'departmentDetail',
+      component: DepartmentDetail
+    },
+    {
+      path: '/department/setting',
+      name: 'departmentSetting',
+      component: DepartmentSetting
+    },
+    {
+      path: '/experience/center',
+      name: 'experienceCenter',
+      component: ExperienceCenter
+    },
+    {
+      path: '/help/out-line',
+      name: 'outLineHelp',
+      component: OutLineHelp
+    },
+    {
+      path: '/help/offline-help',
+      name: 'offlineHelp',
+      component: OfflineHelp
+    },
+    {
+      path: '/device/change-icon',
+      name: 'changeIcon',
+      component: ChangeIcon
     }
   ]
 })

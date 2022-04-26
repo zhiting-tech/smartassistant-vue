@@ -10,7 +10,7 @@
         <van-icon name="arrow-left" color="#3F4663"/>
       </template>
       <template v-if="!isSetting" #right>
-        <span class="add-btn float-r" @click="show = true">{{ $t('locationsetting.add') }}</span>
+        <span class="add-btn float-r" @click="show = true">{{ userInfo.area_type === 1?$t('locationsetting.add'):$t('departmentManage.add') }}</span>
       </template>
     </van-nav-bar>
     <template v-if="isSetting">
@@ -27,28 +27,33 @@
       <div
         v-for="location in locationList"
         :key="location.id"
-        class="location-item"
+        class="location-item one-line"
         :class="{ 'checked': location.id === locationId }"
-        @click="choseRoom(location)">
+        @click="locationId = locationId === location.id?'':location.id">
         {{ location.name }}
       </div>
     </div>
-    <van-button
-      @click="editDevice"
-      :loading="finishLoading"
-      :loading-text="$t('global.saving')"
-      :disabled="finishLoading"
-      class="finish-btn">
-      {{ $t('locationsetting.finish') }}</van-button>
-    <!--修改名称弹窗-->
+    <div class="finish-btn-placeholder">
+      <div class="finish-btn-box">
+        <van-button
+          @click="editDevice"
+          :loading="finishLoading"
+          :loading-text="$t('global.saving')"
+          :disabled="finishLoading"
+          class="finish-btn">
+          {{ $t('locationsetting.finish') }}</van-button>
+      </div>
+    </div>
+    <!--修改名称弹窗 addDepartment-->
     <NameSheet
       v-model="show"
-      :title="$t('locationsetting.sheetTitle')"
+      :title="title"
       :loading="nameLoading"
-      @on-confirm="addLocation"/>
+      @on-confirm="addUpdate"/>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import NameSheet from '@/components/NameSheet.vue'
 
 export default {
@@ -65,7 +70,17 @@ export default {
       show: false,
       locationList: [],
       nameLoading: false,
-      finishLoading: false
+      finishLoading: false,
+      deviceInfo: {}
+    }
+  },
+  computed: {
+    ...mapGetters(['userInfo']),
+    title() {
+      if (this.userInfo.area_type === 1) {
+        return this.$t('locationsetting.sheetTitle')
+      }
+      return this.$t('departmentManage.sheetTitle')
     }
   },
   methods: {
@@ -74,13 +89,23 @@ export default {
     },
     // 初始化区域列表
     initList() {
-      this.http.getLocations().then((res) => {
-        if (res.status !== 0) {
-          return
-        }
-        const { locations } = res.data
-        this.locationList = locations || []
-      })
+      if (this.userInfo.area_type === 1) {
+        this.http.getLocations().then((res) => {
+          if (res.status !== 0) {
+            return
+          }
+          const { locations } = res.data
+          this.locationList = locations || []
+        })
+      } else {
+        this.http.departmentsList().then((res) => {
+          if (res.status !== 0) {
+            return
+          }
+          const { departments } = res.data
+          this.locationList = departments || []
+        })
+      }
     },
     // 选择房间
     choseRoom(location) {
@@ -118,6 +143,40 @@ export default {
         this.nameLoading = false
       })
     },
+    addDepartment(name) {
+      const departmentName = name.trim()
+      if (departmentName === '') {
+        this.$toast(this.$t('departmentManage.emptyTip'))
+        return
+      }
+      const isExit = this.locationList.find(item => item.name === departmentName)
+      if (isExit) {
+        this.$toast(this.$t('departmentManage.repeatTip'))
+        return
+      }
+      const params = {
+        name: departmentName
+      }
+      this.nameLoading = true
+      this.http.addDepartment(params).then((res) => {
+        this.nameLoading = false
+        if (res.status !== 0) {
+          return
+        }
+        this.show = false
+        this.initList()
+        this.$toast(this.$t('global.saveSuccess'))
+      }).catch(() => {
+        this.nameLoading = false
+      })
+    },
+    addUpdate(name) {
+      if (this.userInfo.area_type === 1) {
+        this.addLocation(name)
+      } else {
+        this.addDepartment(name)
+      }
+    },
     // 修改设备信息
     editDevice() {
       let params = {}
@@ -127,13 +186,24 @@ export default {
           this.$toast(this.$t('locationsetting.deviceEmpty'))
           return
         }
+        if (this.userInfo.area_type === 1) {
+          params = {
+            name: this.deviceName.trim(),
+            location_id: locationId
+          }
+        } else {
+          params = {
+            name: this.deviceName.trim(),
+            department_id: locationId
+          }
+        }
+      } else if (this.userInfo.area_type === 1) {
         params = {
-          name: this.deviceName.trim(),
           location_id: locationId
         }
       } else {
         params = {
-          location_id: locationId
+          department_id: locationId
         }
       }
       this.finishLoading = true
@@ -142,17 +212,38 @@ export default {
         if (res.status !== 0) {
           return
         }
-        this.$toast(this.$t('locationsetting.success'))
+        this.$toast(this.$t('global.saveSuccess'))
         // 初始化成功修改跳转至首页 修改位置跳回上一页
         if (this.isSetting) {
-          this.$router.replace({
-            name: 'device'
-          })
+          this.toDeviceDetail()
         } else {
           this.onClickLeft()
         }
       })
-    }
+    },
+    initData(deviceId) {
+      this.http.getDeviceDetail(deviceId).then((res) => {
+        if (res.status !== 0) {
+          return
+        }
+        const { device_info: deviceInfo } = res.data
+        this.deviceInfo = deviceInfo || {}
+      })
+    },
+    toDeviceDetail() {
+      setTimeout(() => {
+        this.$router.push({
+          name: 'deviceDetail',
+          query: {
+            pluginId: this.deviceInfo.plugin.id,
+            deviceId: this.deviceId,
+            isSa: false,
+            pluginUrl: this.deviceInfo.plugin.url,
+            backHome: true
+          }
+        })
+      }, 500)
+    },
   },
   created() {
     const {
@@ -160,6 +251,9 @@ export default {
       locationId,
       deviceId
     } = this.$route.query
+    if (deviceId) {
+      this.initData(deviceId)
+    }
     this.initList()
     this.locationId = locationId ? Number(locationId) : ''
     this.deviceId = deviceId ? Number(deviceId) : 0
@@ -214,6 +308,7 @@ export default {
   margin-right: 0.28rem;
   font-weight: bold;
   color: #555B73;
+  word-break: break-all;
 }
 .location-item:nth-child(3n) {
   margin-right: 0;
@@ -221,6 +316,17 @@ export default {
 .checked {
   border-color: #2DA3F6;
   color: #2DA3F6;
+}
+.finish-btn-placeholder {
+  height: 1.6rem;
+}
+.finish-btn-box {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  padding: 0.3rem;
+  background: $bgColor;
 }
 .finish-btn {
   position: fixed;

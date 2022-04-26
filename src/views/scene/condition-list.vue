@@ -78,6 +78,7 @@ export default {
       popoverShow: false,
       activeArea: -1,
       op: '',
+      type: 1,
       loading: false,
       areaList: [], // 房间列表
       deviceList: []
@@ -135,7 +136,7 @@ export default {
     initList() {
       this.loading = true
       const params = {
-        type: 1
+        type: this.type
       }
       this.http.getDeviceList(params).then((res) => {
         this.loading = false
@@ -178,6 +179,7 @@ export default {
   created() {
     const { query } = this.$route
     this.op = query.op
+    this.type = query.type
     this.initList()
     this.initLocationList()
   }

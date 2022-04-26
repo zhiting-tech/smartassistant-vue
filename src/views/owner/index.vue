@@ -24,9 +24,19 @@
         <span>{{ $t('owner.position') }}</span>
         <van-icon name="arrow" class="right-icon"/>
       </div>
-      <div class="brand-item" @click="toPan">
+      <div class="brand-item" @click="toPan" v-if="wangpan">
         <img src="../../assets/zhiting-pan-icon.png" class="icon-img"/>
         <span>{{ $t('owner.pan') }}</span>
+        <van-icon name="arrow" class="right-icon"/>
+      </div>
+      <div v-if="crm" class="brand-item" @click="toCrm">
+        <img src="../../assets/crm-icon.png" class="icon-img"/>
+        <span>{{ $t('owner.customerManagement') }}</span>
+        <van-icon name="arrow" class="right-icon"/>
+      </div>
+      <div v-if="scm" class="brand-item" @click="toScm">
+        <img src="../../assets/scm-icon.png" class="icon-img"/>
+        <span>{{ $t('owner.scmManagement') }}</span>
         <van-icon name="arrow" class="right-icon"/>
       </div>
       <div class="brand-item" @click="toSupport">
@@ -39,9 +49,14 @@
         <span>{{ $t('owner.platform') }}</span>
         <van-icon name="arrow" class="right-icon"/>
       </div>
-      <div class="brand-item" @click="sceneShow = true">
+      <div class="brand-item" @click="sceneShow = true" v-if="false">
         <img src="../../assets/lang-icon.png" class="icon-img"/>
         <span>{{ $t('owner.lang') }}</span>
+        <van-icon name="arrow" class="right-icon"/>
+      </div>
+      <div class="brand-item" @click="toExperience()">
+        <img src="../../assets/experience-icon.png" class="icon-img"/>
+        <span>{{ $t('owner.experience') }}</span>
         <van-icon name="arrow" class="right-icon"/>
       </div>
       <div class="brand-item" @click="protocol">
@@ -97,11 +112,14 @@ export default {
       loading: false,
       sceneShow: false,
       activeLang: 'zh',
-      ownInfo: {}
+      ownInfo: {},
+      wangpan: false,
+      crm: false,
+      scm: false
     }
   },
   computed: {
-    ...mapGetters(['isApp', 'area', 'userInfo']),
+    ...mapGetters(['isApp', 'area', 'userInfo', 'token']),
     langList() {
       return [
         {
@@ -136,8 +154,26 @@ export default {
           return
         }
         this.ownInfo = res.data
+        this.headerImg = res.data.avatar_url
       }).catch(() => {
         this.loading = false
+      })
+    },
+    // 获取扩展列表信息
+    getExtensions() {
+      this.http.extensions().then((res) => {
+        if (res.status !== 0) {
+          return
+        }
+        if (res.data.extension_names.includes('wangpan')) {
+          this.wangpan = true
+        }
+        if (res.data.extension_names.includes('crm')) {
+          this.crm = true
+        }
+        if (res.data.extension_names.includes('scm')) {
+          this.scm = true
+        }
       })
     },
     toUser() {
@@ -159,12 +195,27 @@ export default {
       // 智汀网盘地址，目前暂时写本地地址
       const lang = this.$methods.getStore('lang')
       const { protocol, hostname } = window.location
-      const href = `${protocol}//${hostname}:9010/#/?from=zhiting&lang=${lang}`
+      console.log(protocol, hostname)
+      const href = `${protocol}//${hostname}:9020/wangpan/#/?from=zhiting&lang=${lang}`
       if (this.isApp) {
         window.location.href = href
       } else {
         window.open(href, '_blank')
       }
+    },
+    // crm
+    toCrm() {
+      // 智汀crm地址，目前暂时写本地地址
+      const { origin } = window.location
+      const href = `${origin}/crm/#/?crmToken=${this.token}` // https://sa248.zhitingtech.com:9091
+      window.open(href, '_blank')
+    },
+    // scm
+    toScm() {
+      // 智汀网盘地址，目前暂时写本地地址
+      const { origin } = window.location
+      const href = `${origin}/scm/#/?scmToken=${this.token}`
+      window.open(href, '_blank')
     },
     toSupport() {
       this.$router.push({
@@ -179,6 +230,17 @@ export default {
         name: 'thirdPlatform'
       })
     },
+    toExperience() {
+      this.$router.push({
+        name: 'experienceCenter'
+      })
+    },
+    // 跳转体验中心
+    experience() {
+      this.$router.push({
+        name: 'experience'
+      })
+    },
     // 跳转用户协议
     protocol() {
       this.$router.push({
@@ -187,6 +249,7 @@ export default {
     }
   },
   created() {
+    this.getExtensions()
     this.activeLang = this.$methods.getStore('lang') || 'zh'
     this.getUserInfo()
   }

@@ -10,10 +10,12 @@
         <van-icon name="arrow-left" color="#3F4663"/>
       </template>
     </van-nav-bar>
-    <iframe id="agreement" width="100%" height="100%" class="agreement" src="https://scgz.zhitingtech.com/smartassitant/protocol/user"></iframe>
+    <iframe id="agreement" width="100%" height="100%" class="agreement" :src="protocolUrl"></iframe>
   </div>
 </template>
 <script>
+import { envOrigin } from '@/config'
+
 export default {
   name: 'agreement',
   data() {
@@ -27,6 +29,11 @@ export default {
       const pathName = window.location.pathname.substring(1)
       const webName = pathName === '' ? '' : pathName.substring(0, pathName.lastIndexOf('/') + 1)
       return `${window.location.protocol}//${window.location.host}/${webName}`
+    }
+  },
+  computed: {
+    protocolUrl() {
+      return `${envOrigin}/smartassitant/protocol/user/`
     }
   },
   mounted() {}

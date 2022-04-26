@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <van-nav-bar
-      :title="$t('locationmanage.title')"
+      :title="$t('locationManage.title')"
       left-arrow
       :fixed="true"
       :placeholder="true"
@@ -10,8 +10,8 @@
         <van-icon name="arrow-left" color="#3F4663"/>
       </template>
       <template v-if="!isEmpty&&permissions.update_location_order" #right>
-        <span v-if="!isEdit" class="nav-edit" @click="isEdit = true">{{ $t('locationmanage.edit') }}</span>
-        <van-button v-else class="nav-edit" :loading="saveLoading" :disabled="saveLoading" @click="handleEdit">{{ $t('locationmanage.finish') }}</van-button>
+        <span v-if="!isEdit" class="nav-edit" @click="isEdit = true">{{ $t('locationManage.edit') }}</span>
+        <van-button v-else class="nav-edit" :loading="saveLoading" :disabled="saveLoading" @click="handleEdit">{{ $t('locationManage.finish') }}</van-button>
       </template>
     </van-nav-bar>
     <!--loading模块-->
@@ -19,8 +19,8 @@
     <div v-else-if="isEmpty" class="empty-box">
       <div class="empty-wrap">
         <van-image :src="emptyImg" class="empty-img"/>
-        <p class="empty-word">{{ $t('locationmanage.empty') }}</p>
-        <van-button v-if="permissions.add_location" class="empty-btn" @click="handleAdd">{{ $t('locationmanage.add') }}</van-button>
+        <p class="empty-word">{{ $t('locationManage.empty') }}</p>
+        <van-button v-if="permissions.add_location" class="empty-btn" @click="handleAdd">{{ $t('locationManage.add') }}</van-button>
       </div>
     </div>
     <template v-else>
@@ -46,7 +46,7 @@
       <div class="add-btn-box">
         <button v-show="!isEdit&&permissions.add_location" class="add-btn" @click="handleAdd">
           <van-icon name="plus" class="add-btn__icon"/>
-          {{ $t('locationmanage.add') }}
+          {{ $t('locationManage.add') }}
         </button>
       </div>
     </div>
@@ -54,7 +54,7 @@
     <!--修改名称弹窗-->
     <NameSheet
       v-model="show"
-      :title="$t('locationmanage.sheetTitle')"
+      :title="$t('locationManage.sheetTitle')"
       :init="locationName"
       :loading="nameLoading"
       @on-confirm="addRoom"/>
@@ -151,12 +151,12 @@ export default {
     addRoom(name) {
       const room = name.trim()
       if (room === '') {
-        this.$toast(this.$t('locationmanage.emptyTip'))
+        this.$toast(this.$t('locationManage.emptyTip'))
         return
       }
       const isExit = this.locationList.find(item => item.name === room)
       if (isExit) {
-        this.$toast(this.$t('locationmanage.repeatTip'))
+        this.$toast(this.$t('locationManage.repeatTip'))
         return
       }
       const params = {

@@ -43,7 +43,7 @@ const activeIcon = require('@/assets/check-icon.png')
 const inactiveIcon = require('@/assets/uncheck-icon.png')
 
 export default {
-  name: 'switchPopup',
+  name: 'curtainPopup',
   props: {
     value: {
       type: Boolean,
@@ -70,11 +70,11 @@ export default {
       active: this.initVal,
       opList: [
         {
-          value: 'on',
+          value: 100,
           name: this.$t('condition.curtainOpen')
         },
         {
-          value: 'off',
+          value: 0,
           name: this.$t('condition.curtainClose')
         },
         {
@@ -95,10 +95,10 @@ export default {
   methods: {
     initData() {
       setTimeout(() => {
-        if (typeof this.initVal === 'number') {
-          this.active = 'percent'
-        } else {
+        if (this.initVal === 0 || this.initVal === 100) {
           this.active = this.initVal
+        } else {
+          this.active = 'percent'
         }
       })
     },

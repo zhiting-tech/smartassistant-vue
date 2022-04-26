@@ -224,6 +224,27 @@ button {
   opacity: 0.5;
 }
 
+.btn-box-placeholder {
+  height: 1.6rem;
+}
+.btn-box-placeholder .btn-box {
+  width: 100%;
+  max-width: 750px;
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  padding: 0.3rem;
+  background: #fff;
+}
+.btn-box-placeholder .btn-box .btn {
+  width: 100%;
+  height: 1rem;
+  background: #2DA3F6;
+  border-radius: 0.2rem;
+  color: #fff;
+}
+
 /* vant 样式覆盖 */
 #app .van-tabbar--fixed {
   max-width: 750px;

@@ -21,7 +21,7 @@
         v-if="deviceInfo.permissions.update_device"
         class="device-item clearfix"
         @click="show = true">
-        <span class="device-item--label float-l">{{ $t('devicemanage.name') }}</span>
+        <span class="device-item--label float-l">{{ $t('deviceManage.name') }}</span>
         <p class="device-item--name float-r">
           <span class="one-line">{{ deviceInfo.name }}</span>
           <van-icon name="arrow" class="device-item--icon"/>
@@ -31,9 +31,9 @@
         v-if="deviceInfo.permissions.update_device"
         @click="toAreaSetting"
         class="device-item clearfix">
-        <span class="device-item--label float-l">{{ $t('devicemanage.position') }}</span>
+        <span class="device-item--label float-l">{{ $t('deviceManage.position') }}</span>
         <p class="device-item--name float-r">
-          <span class="one-line">{{ location.name }}</span>
+          <span class="one-line">{{ userInfo.area_type === 1?location.name:department.name }}</span>
           <van-icon name="arrow" class="device-item--icon"/>
         </p>
       </div>
@@ -41,8 +41,18 @@
         v-if="!isSa"
         @click="toPluginDetail"
         class="device-item clearfix">
-        <span class="device-item--label float-l">{{ $t('devicemanage.plugin') }}</span>
+        <span class="device-item--label float-l">{{ $t('deviceManage.plugin') }}</span>
         <p class="device-item--name float-r">
+          <van-icon name="arrow" class="device-item--icon"/>
+        </p>
+      </div>
+      <div
+        v-if="deviceInfo.permissions.update_device"
+        @click="toChangeIcon"
+        class="device-item clearfix">
+        <span class="device-item--label float-l">{{ $t('deviceManage.changeIcon') }}</span>
+        <p class="device-item--name float-r">
+          <span class="one-line">{{ deviceInfo.logo.name }}</span>
           <van-icon name="arrow" class="device-item--icon"/>
         </p>
       </div>
@@ -51,12 +61,12 @@
       v-if="deviceInfo.permissions.delete_device && !isSa"
       class="delete-btn"
       @click="deleteShow = true">
-      {{ $t('devicemanage.del') }}
+      {{ $t('deviceManage.del') }}
     </button>
     <!--修改名称弹窗-->
     <NameSheet
       v-model="show"
-      :title="$t('devicemanage.name')"
+      :title="$t('deviceManage.name')"
       :init="deviceInfo.name"
       :loading="nameLoading"
       @on-confirm="editDevice"/>
@@ -67,11 +77,12 @@
       :before-close="deleteDevice"
       confirm-button-color="#2DA3F6"
       cancel-button-color="#94A5BE">
-      <h3 class="delete-title">{{ $t('devicemanage.delTitle') }}</h3>
+      <h3 class="delete-title">{{ $t('deviceManage.delTitle') }}</h3>
     </van-dialog>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import NameSheet from '@/components/NameSheet.vue'
 
 export default {
@@ -86,12 +97,18 @@ export default {
       show: false,
       deleteShow: false,
       deviceInfo: {
-        permissions: {}
+        permissions: {},
+        logo: {}
       },
-      nameLoading: false
+      nameLoading: false,
+      msgId: 1
     }
   },
   computed: {
+    ...mapGetters(['userInfo', 'websocket']),
+    department() {
+      return this.deviceInfo.department || {}
+    },
     location() {
       return this.deviceInfo.location || {}
     },
@@ -100,28 +117,46 @@ export default {
     },
     pluginInfo() {
       return this.deviceInfo.plugin || {}
+    },
+    paramsId() {
+      if (this.userInfo.area_type === 1) {
+        return this.location.id || ''
+      }
+      return this.department.id || ''
     }
   },
   methods: {
     onClickLeft() {
       this.$router.go(-1)
     },
+    // 跳转区域设置
     toAreaSetting() {
       this.$router.push({
         name: 'locationSetting',
         query: {
           areaId: this.areaInfo.id,
-          locationId: this.location.id || '',
+          locationId: this.paramsId,
           deviceId: this.id
         }
       })
     },
+    // 跳转插件详情
     toPluginDetail() {
       const pluginId = this.pluginInfo.id
       this.$router.push({
         name: 'pluginDetail',
         query: {
           pluginId
+        }
+      })
+    },
+    // 跳转更换图标
+    toChangeIcon() {
+      this.$router.push({
+        name: 'changeIcon',
+        query: {
+          deviceId: this.deviceInfo.id,
+          type: this.deviceInfo.logo.type
         }
       })
     },
@@ -139,7 +174,7 @@ export default {
     editDevice(name) {
       const room = name.trim()
       if (room === '') {
-        this.$toast(this.$t('devicemanage.empty'))
+        this.$toast(this.$t('deviceManage.empty'))
         return
       }
       const params = {
@@ -159,7 +194,7 @@ export default {
           sa.name = room
           this.$methods.setSession('sa', JSON.stringify(sa))
         }
-        this.$toast(this.$t('devicemanage.modify'))
+        this.$toast(this.$t('deviceManage.modify'))
         this.deviceInfo.name = room
         this.show = false
       }).catch(() => {
@@ -169,15 +204,28 @@ export default {
     // 删除设备
     deleteDevice(action, done) {
       if (action === 'confirm') {
-        // 删除房间
-        this.http.deleteDevice(this.id).then((res) => {
-          done()
-          if (res.status !== 0) {
-            return
+        // 发送发现指令
+        this.msgId = Date.now()
+        this.websocket.send({
+          id: this.msgId,
+          domain: this.deviceInfo.plugin.id,
+          service: 'disconnect',
+          data: {
+            iid: this.deviceInfo.iid,
           }
-          this.$router.push({
-            name: 'device'
-          })
+        })
+        // 接受消息
+        this.websocket.onmessage((data) => {
+          const msg = JSON.parse(data)
+          if (msg.id === this.msgId) {
+            if (msg.success) {
+              this.$router.push({
+                name: 'device'
+              })
+            } else {
+              this.$toast(msg.error.message)
+            }
+          }
         })
       } else {
         done()

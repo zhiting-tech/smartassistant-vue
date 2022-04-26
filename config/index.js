@@ -26,7 +26,8 @@ const env = process.env.NODE_ENV
 const getRemote = () => {
   const isHttps = /https/.test(window.location.protocol)
   if (env === 'development') {
-    return 'ws://192.168.22.123:9020/ws' // 'sa.zhitingtech.com'
+    return 'ws://192.168.22.245:9020/ws' // 'sa.zhitingtech.com'
+    // return 'ws://192.168.22.103:37965/ws'
   }
   if (isHttps) {
     return `wss://${window.location.host}/ws`

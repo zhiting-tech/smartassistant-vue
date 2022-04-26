@@ -11,7 +11,7 @@
       </template>
     </van-nav-bar>
     <iframe
-      src="https://sc.zhitingtech.com/#/third-platform"
+      :src="platformUrl"
       width="100%"
       height="100%"
       scrolling="no"
@@ -19,10 +19,17 @@
   </div>
 </template>
 <script>
+import { envOrigin } from '@/config'
+
 export default {
   name: 'third',
   data() {
     return {}
+  },
+  computed: {
+    platformUrl() {
+      return `${envOrigin}/#/third-platform`
+    }
   },
   methods: {
     onClickLeft() {

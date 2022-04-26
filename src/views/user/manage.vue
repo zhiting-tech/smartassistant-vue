@@ -33,6 +33,16 @@
         <van-icon v-if="!isOwner" name="arrow" class="right-icon"/>
         </p>
       </div>
+      <div v-if="userInfo.area_type=== 2" class="member-item" @click="handleDepartmentChange()">
+        <img src="../../assets/department-icon.png" class="icon-img"/>
+        <span class="label">{{ $t('membermanage.department') }}</span>
+        <p class="name">
+          <span class="over">
+            {{ departmentName?departmentName:$t('membermanage.undivided') }}
+          </span>
+          <van-icon v-if="!isOwner" name="arrow" class="right-icon"/>
+        </p>
+      </div>
     </div>
     <div class="delete-btn-placeholder" v-if="delPermission&&!isOwner">
       <div class="delete-btn-box">
@@ -57,7 +67,7 @@
                 v-for="(role, index) in roleList"
                 :key="role.value"
                 clickable
-                @click="toggle(index)">
+                @click="toggle(index, 'role')">
                 <template #title>
                   <p class="role-title" :class="{ 'role-active': result.includes(role.id) }">
                     <span class="role-name one-line float-l">
@@ -83,6 +93,49 @@
                 :loading-text="$t('global.saving')"
                 :disabled="!result.length || saveLoading"
                 @click="roleChange">{{ $t('global.confirm') }}</van-button>
+            </div>
+          </div>
+        </div>
+      </van-action-sheet>
+    </div>
+    <!-- 选择部门 -->
+    <div class="sheet-part">
+      <van-action-sheet
+        v-model="departmentShow"
+        :title="$t('membermanage.sheetTitle2')">
+        <div class="role-wrap">
+          <van-checkbox-group v-model="departmentResult">
+            <van-cell-group>
+              <van-cell
+                v-for="(department, index) in departmentList"
+                :key="department.id"
+                clickable
+                @click="toggle(index, 'department')">
+                <template #title>
+                  <p class="role-title" :class="{ 'role-active': departmentResult.includes(department.id) }">
+                    <span class="role-name one-line float-l">
+                      {{ department.name }}
+                    </span>
+                  </p>
+                </template>
+                <template #right-icon>
+                  <van-checkbox :name="department.id" ref="departmentCheckboxes">
+                    <template #icon="props">
+                      <img class="img-icon" :src="props.checked ? activeIcon : inactiveIcon" />
+                    </template>
+                  </van-checkbox>
+                </template>
+              </van-cell>
+            </van-cell-group>
+          </van-checkbox-group>
+          <div class="confirm-btn-placeholder">
+            <div class="confirm-btn-box">
+              <van-button
+                class="confirm-btn"
+                :loading="saveLoading"
+                :loading-text="$t('global.saving')"
+                :disabled="saveLoading"
+                @click="departmentChange">{{ $t('global.confirm') }}</van-button>
             </div>
           </div>
         </div>
@@ -116,6 +169,7 @@ export default {
       sceneShow: false, // 角色选择
       sureShow: false, // 删除弹窗
       result: [], // 角色列表
+      departmentResult: [], // 部门列表
       activeIcon,
       inactiveIcon,
       roleList: [],
@@ -124,7 +178,9 @@ export default {
       isOwner: false,
       isSelf: false,
       memberInfo: {}, // 用户信息
-      saveLoading: false
+      saveLoading: false,
+      departmentShow: false,
+      departmentList: []
     }
   },
   computed: {
@@ -139,6 +195,16 @@ export default {
           role += `${item.name}、`
         })
         return role.replace(/、$/, '')
+      }
+      return ''
+    },
+    departmentName() {
+      let department = ''
+      if (this.memberInfo.department_infos) {
+        this.memberInfo.department_infos.forEach((item) => {
+          department += `${item.name}、`
+        })
+        return department.replace(/、$/, '')
       }
       return ''
     }
@@ -163,6 +229,19 @@ export default {
         this.roleList = roles.filter(item => item.id !== -1) || []
       })
     },
+    // 获取角色列表
+    getDepartmentList() {
+      if (!this.permissions.get_department) {
+        return
+      }
+      this.http.departmentsList().then((res) => {
+        if (res.status !== 0) {
+          return
+        }
+        const { departments } = res.data
+        this.departmentList = departments.filter(item => item.id !== -1) || []
+      })
+    },
     // 获取成员详情
     getMemberDetail() {
       this.loading = true
@@ -174,8 +253,11 @@ export default {
         this.isOwner = res.data.is_owner
         this.isSelf = res.data.is_self
         this.memberInfo = res.data || {}
+        this.headerImg = res.data.avatar_url
         const roleList = this.memberInfo.role_infos || []
+        const departmentList = this.memberInfo.department_infos || []
         this.result = roleList.map(item => item.id)
+        this.departmentResult = departmentList.map(item => item.id)
       }).catch(() => {
         this.loading = false
       })
@@ -186,10 +268,23 @@ export default {
         return
       }
       this.sceneShow = true
+      this.getRoleList()
+    },
+    // 修改部门按钮
+    handleDepartmentChange() {
+      if (!this.permissions.update_area_member_department) {
+        return
+      }
+      this.departmentShow = true
+      this.getDepartmentList()
     },
     // 选择角色
-    toggle(index) {
-      this.$refs.checkboxes[index].toggle()
+    toggle(index, type) {
+      if (type === 'role') {
+        this.$refs.checkboxes[index].toggle()
+      } else {
+        this.$refs.departmentCheckboxes[index].toggle()
+      }
     },
     // 修改成员角色
     roleChange() {
@@ -217,6 +312,33 @@ export default {
         this.$toast(this.$t('membermanage.modify'))
       })
     },
+    // 修改部门
+    departmentChange() {
+      const params = {
+        department_ids: this.departmentResult
+      }
+      this.saveLoading = true
+      this.http.editUser(this.userId, params).then((res) => {
+        this.saveLoading = false
+        this.departmentShow = false
+        if (res.status !== 0) {
+          return
+        }
+        // 如果是自己修改自己的角色就要重新获取权限
+        if (Number(this.userId) === this.userInfo.user_id) {
+          this.$bus.$emit('updatePermission', this.userInfo.user_id)
+        }
+        // 修改本地名称
+        const departmentResult = []
+        this.departmentResult.forEach((departmentId) => {
+          const department = this.departmentList.find(item => item.id === departmentId)
+          departmentResult.push(department)
+        })
+        this.memberInfo.role_infos = departmentResult
+        this.getMemberDetail()
+        this.$toast(this.$t('membermanage.modify'))
+      })
+    },
     // 删除成员
     deleteMember(action, done) {
       if (action === 'confirm') {
@@ -239,7 +361,6 @@ export default {
   created() {
     const { query } = this.$route
     this.userId = query.userId
-    this.getRoleList()
     this.getMemberDetail()
   }
 }
@@ -349,6 +470,7 @@ export default {
 }
 .role-name {
   max-width: 6rem;
+  color: #3F4663;
 }
 .img-icon {
   height: 0.37rem;

@@ -23,19 +23,21 @@
     </div>
     <p class="desc">{{ $t('owner.logSyncDesc') }}</p>
   </div>
-  <div class="type-box">
-    <p class="log-tip">{{ $t('owner.logging') }}</p>
-    <div class="filter-box">
-      <p class="filter-item" @click="dateShow = true">
-        <span>{{ logDate }}</span>
-        <van-icon name="arrow-down" color="#3f4663" class="down-icon"/>
-      </p>
-      <p class="filter-item" @click="typeShow = true">
-        <span>{{ activeLog }}</span>
-        <van-icon name="arrow-down" color="#3f4663" class="down-icon"/>
-      </p>
+  <van-sticky :offset-top="`.92rem`">
+    <div class="type-box">
+      <p class="log-tip">{{ $t('owner.logging') }}</p>
+      <div class="filter-box">
+        <p class="filter-item" @click="dateShow = true">
+          <span>{{ logDate }}</span>
+          <van-icon name="arrow-down" color="#3f4663" class="down-icon"/>
+        </p>
+        <p class="filter-item" @click="typeShow = true">
+          <span>{{ activeLog }}</span>
+          <van-icon name="arrow-down" color="#3f4663" class="down-icon"/>
+        </p>
+      </div>
     </div>
-  </div>
+  </van-sticky>
   <div class="log-list">
     <van-list
       v-model="loading"
@@ -180,10 +182,11 @@ export default {
         type: 'all', // all  info warning error
         page: 1
       }, // 获取列表参数
-      minDate: new Date(2021, 8, 20), // 最小日期
-      maxDate: new Date(), // 最大日期
+      minDate: new Date(2021, 11, 20), // 最小日期
+      maxDate: new Date(2021, 11, 27), // 最大日期
       confirmTitle: this.$t('owner.logUpload'),
-      confirmSecondTitle: this.$t('owner.logUploadConfirmTip')
+      confirmSecondTitle: this.$t('owner.logUploadConfirmTip'),
+      lastDate: ''
     }
   },
   computed: {
@@ -274,6 +277,9 @@ export default {
           this.finished = true
           return
         }
+        if (res.data.last_line) {
+          this.params.last_line = res.data.last_line
+        }
         if (isMore) {
           this.logList = this.logList.concat(this.formatData(res.data.logs))
         } else {
@@ -285,19 +291,23 @@ export default {
         if (!this.currentDate) {
           if (this.params.date === res.data.last_day) {
             this.params.page += 1
-          } else {
+          } else if (res.data.logs.length < PAGE_SIZE) {
             this.params.page = 1
             this.params.date = res.data.last_day
+          } else {
+            this.params.page += 1
           }
         } else {
           this.params.page += 1
         }
         // 超过一千条或者没有日志了不再请求
-        if (!res.data.last_day || this.logList.length > 1000 || (this.currentDate && this.logList.length < PAGE_SIZE)) {
+        if (!res.data.last_day || (this.currentDate && this.logList.length < PAGE_SIZE)) {
+          this.params.page = 1
           this.finished = true
         }
       }).catch(() => {
         this.loading = false
+        this.finished = true
       })
     },
     // 格式化数据
@@ -336,12 +346,36 @@ export default {
           this.feedbackShow = true
         }, 500)
       })
+    },
+    // 获取当天年月日
+    getLastDate() {
+      const date = new Date()
+      const year = date.getFullYear()
+      const mon = date.getMonth()
+      const day = date.getDate()
+      this.maxDate = new Date(year, mon, day) // 最大日期
+      if (day >= 6) {
+        this.minDate = new Date(year, mon, day - 6) // 最小日期
+      } else if (mon > 0) {
+        if (mon === 2 || mon === 4 || mon === 6 || mon === 7 || mon === 9 || mon === 11) {
+          this.minDate = new Date(year, mon - 1, 30 - Math.abs(day - 6))
+        } else if (mon === 1) {
+          this.minDate = new Date(year, mon - 1, 28 - Math.abs(day - 6))
+        } else {
+          this.minDate = new Date(year, mon - 1, 31 - Math.abs(day - 6))
+        }
+      } else if (mon === 0) {
+        this.minDate = new Date(year - 1, 11, 30 - Math.abs(day - 6))
+      }
     }
   },
   created() {
     this.initDate()
     this.getSetting()
     this.loadData()
+  },
+  mounted() {
+    this.getLastDate()
   }
 }
 </script>
@@ -384,6 +418,7 @@ export default {
 }
 .type-box {
   padding: 0.3rem;
+  background: #f6f8fd;
   .log-tip {
     padding-bottom: 0.18rem;
     font-size: 0.24rem;
@@ -432,7 +467,7 @@ export default {
     }
     .debug {
       background-color: rgba(45, 163, 246, 1);
-      color: #2da3f6;
+      color: #ffffff;
     }
     .warn {
       background-color: rgba(246, 174, 30, 0.2);
@@ -463,6 +498,7 @@ export default {
   bottom: 0;
   transform: translate(-50%);
   padding: 0.3rem;
+  background-color: #f6f8fd;
 }
 .commit-btn {
   width: 6.9rem;
@@ -470,6 +506,9 @@ export default {
   background: #2da3f6;
   border-radius: 0.2rem;
   color: #fff;
+}
+.pa160{
+  padding-bottom: 1.6rem;
 }
 </style>
 <style scoped>

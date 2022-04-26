@@ -60,7 +60,7 @@
           <p class="error-tip">{{ passwordErr }}</p>
         </div>
       </div>
-      <div class="btn-box">
+      <div>
         <van-button
           class="login-btn"
           @click="login"

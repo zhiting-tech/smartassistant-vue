@@ -22,7 +22,7 @@
       </div>
       <div class="control">
         <p v-if="needCondition && tipWord" class="tip-word">{{ tipWord }}</p>
-        <p class="proportion">{{ percentage }}<span>%</span></p>
+        <p class="proportion">{{ percentage }}<span>{{unit}}</span></p>
         <van-slider
           v-model="sliderVal"
           bar-height="0.8rem"
@@ -85,7 +85,11 @@ export default {
     max: {
       type: Number,
       default: 100
-    }
+    },
+    unit: {
+      type: String,
+      default: '%'
+    },
   },
   data() {
     return {
@@ -122,7 +126,7 @@ export default {
       setTimeout(() => {
         this.active = this.initCondition
         this.sliderVal = this.initVal - 0
-        this.percentage = this.$methods.getPercent(this.max, this.min, this.sliderVal)
+        this.percentage = this.unit === '%' ? this.$methods.getPercent(this.max, this.min, this.sliderVal) : this.sliderVal
       })
     },
     handleCondition(item) {
@@ -132,7 +136,7 @@ export default {
       this.$emit('on-confirm', this.sliderVal, this.active)
     },
     onChange(value) {
-      this.percentage = this.$methods.getPercent(this.max, this.min, value)
+      this.percentage = this.unit === '%' ? this.$methods.getPercent(this.max, this.min, value) : value
     }
   }
 }

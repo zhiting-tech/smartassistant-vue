@@ -1,9 +1,6 @@
 <template>
   <div class="log-detail-box">
-    <div
-      ref="expandContent"
-      class="content-box"
-      :style="{ 'max-height': expand ? '10rem' : '1.42rem' }">
+    <div ref="expandContent" class="content-box" :style="{ 'max-height': expand ? '10rem' : '1.42rem' }">
       <slot></slot>
     </div>
     <div

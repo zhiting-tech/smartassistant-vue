@@ -8,7 +8,7 @@
     @closed="onClosed"
     class="code-dialog">
     <div class="code-wrap">
-      <h3 class="code-title">{{ $t('areadetail.inviteTip') }}</h3>
+      <h3 class="code-title">{{ $t('areaDetail.inviteTip') }}</h3>
       <van-icon name="cross" class="close-btn" @click="show=false"/>
       <div v-show="!isCreateImg" ref="saveImg" class="code-body">
         <van-image
@@ -16,11 +16,11 @@
           class="user-header"
           @error="setDefaultHeader"/>
         <p class="user-name">{{ code.name }}</p>
-        <p class="label">{{ $t('areadetail.joinTip') }}{{ code.areaName }}</p>
+        <p class="label">{{ $t('areaDetail.joinTip') }}{{ code.areaName }}</p>
         <div class="code-box">
           <vue-qr :text="download_url" :margin="10" :size="200"></vue-qr>
         </div>
-        <p class="time">{{ $t('areadetail.timeTip') }}</p>
+        <p class="time">{{ $t('areaDetail.timeTip') }}</p>
       </div>
       <div v-show="isCreateImg" ref="imgBox" class="img-box">
         <img :src="saveUrl"/>
@@ -29,10 +29,10 @@
     <van-button
       v-if="!isMobile"
       class="save-btn"
-      @click="saveImage">{{ $t('areadetail.saveTip') }}</van-button>
+      @click="saveImage">{{ $t('areaDetail.saveTip') }}</van-button>
     <van-button
       v-else
-      class="save-btn">{{ $t('areadetail.tapTip') }}</van-button>
+      class="save-btn">{{ $t('areaDetail.tapTip') }}</van-button>
   </van-dialog>
 </template>
 <script>

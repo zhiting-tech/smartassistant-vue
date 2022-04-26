@@ -20,7 +20,7 @@
         size="0.48rem"
         color="#3F4663"/>
     </div>
-    <van-notice-bar color="#F6AE1E" background="#FDF3DF" v-if="false">
+    <van-notice-bar color="#F6AE1E" background="#FDF3DF" left-icon="info-o" v-if="false">
       智慧中心连接失败或者无权限
       <template v-slot:right-icon>
         <span class="notice-right"><van-icon name="replay" />刷新</span>
@@ -30,104 +30,111 @@
     <template v-else>
       <!-- 存在场景 -->
       <div class="scene-box" v-if="manualList.length>0 || autoRunList.length>0">
-        <div ref="manualCon" class="scene-type-box" v-if="manualList.length>0">
-          <van-sticky :container="manualCon">
-            <div class="type-name">{{$t('scene.manual')}}</div>
+        <div ref="sceneType" class="scene-type-box">
+          <van-sticky :container="sceneType">
+            <div class="scene-type-header clearfix">
+              <van-tabs class="float-l" :line-width="30" title-inactive-color="#94A5BE" title-active-color="#3F4663" background="#f6f8fd" v-model="activeType">
+                <van-tab :title="`${$t('scene.manual')}`" :disabled="!isSort" name="manual"></van-tab>
+                <van-tab :title="`${$t('scene.automatic')}`" :disabled="!isSort" name="automatic"></van-tab>
+              </van-tabs>
+              <div class="float-r sort" @click="sort"><span>{{isSort?'排序':'完成'}}</span></div>
+            </div>
           </van-sticky>
-          <div class="type-item" @click="reviseScene(item)" v-for="(item,index) in manualList" :key="index">
-            <div class="item-header">
-              <div class="title">{{item.name}}</div>
-              <div class="operation" @click.stop>
-                <van-button
-                  :class="{'disabled': !item.control_permission || !permissions.control_scene}"
-                  size="small"
-                  :color="!item.control_permission || !permissions.control_scene?'#CFD6E0':''"
-                  :loading="item.loading"
-                  @click="operation(item)">
-                  {{ $t('scene.operation') }}
-                </van-button>
-              </div>
-            </div>
-            <div class="item-list">
-              <div class="right-box">
-                <div v-for="(item1, index1) in item.items" :key="index1" class="image-item" :class="{'borer': item1.type===1}">
-                  <CommonImage
-                    class="img"
-                    fit="contain"
-                    :src="item1.type===1?item1.logo_url:sceneImg">
-                  </CommonImage>
-                  <span v-if="item1.status===3" class="mask">{{$t('scene.offLine')}}</span>
-                  <span v-if="item1.status===2" class="mask">{{$t('scene.deleted')}}</span>
+          <draggable v-if="activeType==='manual'" v-model="manualList" :disabled="isSort" animation="300">
+            <div class="type-item" :class="{'classify': !isSort}" @click="isSort?reviseScene(item):''" v-for="(item,index) in manualList" :key="index">
+              <div class="item-header">
+                <div class="title">{{item.name}}</div>
+                <div class="operation" v-if="isSort" @click.stop>
+                  <van-button
+                    :class="{'disabled': !item.control_permission || !permissions.control_scene}"
+                    size="small"
+                    :color="!item.control_permission || !permissions.control_scene?'#CFD6E0':''"
+                    :loading="item.loading"
+                    @click="operation(item)">
+                    {{ $t('scene.operation') }}
+                  </van-button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        <div ref="automaticCon" class="scene-type-box" v-if="autoRunList.length>0">
-          <van-sticky :container="automaticCon">
-            <div class="type-name">{{$t('scene.automatic')}}</div>
-          </van-sticky>
-          <div class="type-item" @click="reviseScene(item)" v-for="(item,index) in autoRunList" :key="index">
-            <div class="item-header">
-              <div class="title">{{item.name}}</div>
-              <div class="operation" @click.stop>
-                <van-switch
-                  :class="{'disabled': !item.control_permission || !permissions.control_scene}"
-                  v-model="item.is_on"
-                  :active-color="!item.control_permission || !permissions.control_scene ? '#CFD6E0' : '#2DA3F6'"
-                  inactive-color="#CFD6E0"
-                  size=".36rem"
-                  :loading="item.loading"
-                  @input="!item.loading?onInput(item):''" />
-              </div>
-            </div>
-            <div class="item-list">
-              <div class="left-box">
-                <div class="image-item">
-                  <CommonImage
-                    v-if="item.condition.type===1"
-                    width=".8rem"
-                    height=".8rem"
-                    class="img"
-                    fit="contain"
-                    :src="timingImg">
-                  </CommonImage>
-                  <van-image
-                    v-if="item.condition.type===2"
-                    width=".8rem"
-                    height=".8rem"
-                    class="img"
-                    fit="contain"
-                    :src="item.condition.logo_url?item.condition.logo_url:deviceImg">
-                    <template v-slot:error>
-                      <van-image
-                        width=".8rem"
-                        height=".8rem"
-                        class="img"
-                        fit="contain"
-                        :src="deviceImg">
-                      </van-image>
-                    </template>
-                  </van-image>
-                  <span v-if="item.condition.status===3" class="mask">{{$t('scene.offLine')}}</span>
-                  <span v-if="item.condition.status===2" class="mask">{{$t('scene.deleted')}}</span>
-                </div>
-                <div class="image-item chains">
-                  <van-image width=".32rem" height="auto" lazy-load :src="chains"/>
+              <div class="item-list">
+                <div class="right-box">
+                  <div v-for="(item1, index1) in item.items" :key="index1" class="image-item" :class="{'borer': item1.type===1}">
+                    <CommonImage
+                      class="img"
+                      fit="contain"
+                      :src="item1.type===1?item1.logo_url:sceneImg">
+                    </CommonImage>
+                    <span v-if="item1.status===3" class="mask">{{$t('scene.offLine')}}</span>
+                    <span v-if="item1.status===2" class="mask">{{$t('scene.deleted')}}</span>
+                  </div>
                 </div>
               </div>
-              <div class="right-box">
-                <div v-for="(item1, index1) in item.items" :key="index1" class="image-item" :class="{'borer': item1.type===1}">
-                  <CommonImage
-                    class="img"
-                    fit="contain"
-                    :src="item1.type===1?item1.logo_url:sceneImg"/>
-                  <span v-if="item1.status===3" class="mask">{{$t('scene.offLine')}}</span>
-                  <span v-if="item1.status===2" class="mask">{{$t('scene.deleted')}}</span>
+              <van-icon class="wapNavIcon" size=".5rem" color="#94A5BE" v-if="!isSort" name="wap-nav" />
+            </div>
+          </draggable>
+          <draggable v-if="activeType==='automatic'" v-model="autoRunList" :disabled="isSort" animation="300">
+            <div class="type-item" :class="{'classify': !isSort}" @click="isSort?reviseScene(item):''" v-for="(item,index) in autoRunList" :key="index">
+              <div class="item-header">
+                <div class="title">{{item.name}}</div>
+                <div class="operation" v-if="isSort" @click.stop>
+                  <van-switch
+                    :class="{'disabled': !item.control_permission || !permissions.control_scene}"
+                    v-model="item.is_on"
+                    :active-color="!item.control_permission || !permissions.control_scene ? '#CFD6E0' : '#2DA3F6'"
+                    inactive-color="#CFD6E0"
+                    size=".36rem"
+                    :loading="item.loading"
+                    @input="!item.loading?onInput(item):''" />
                 </div>
               </div>
+              <div class="item-list">
+                <div class="left-box">
+                  <div class="image-item">
+                    <CommonImage
+                      v-if="item.condition.type===1"
+                      width=".8rem"
+                      height=".8rem"
+                      class="img"
+                      fit="contain"
+                      :src="timingImg">
+                    </CommonImage>
+                    <van-image
+                      v-if="item.condition.type===2"
+                      width=".8rem"
+                      height=".8rem"
+                      class="img"
+                      fit="contain"
+                      :src="item.condition.logo_url?item.condition.logo_url:deviceImg">
+                      <template v-slot:error>
+                        <van-image
+                          width=".8rem"
+                          height=".8rem"
+                          class="img"
+                          fit="contain"
+                          :src="deviceImg">
+                        </van-image>
+                      </template>
+                    </van-image>
+                    <span v-if="item.condition.status===3" class="mask">{{$t('scene.offLine')}}</span>
+                    <span v-if="item.condition.status===2" class="mask">{{$t('scene.deleted')}}</span>
+                  </div>
+                  <div class="image-item chains">
+                    <van-image width=".32rem" height="auto" lazy-load :src="chains"/>
+                  </div>
+                </div>
+                <div class="right-box">
+                  <div v-for="(item1, index1) in item.items" :key="index1" class="image-item" :class="{'borer': item1.type===1}">
+                    <CommonImage
+                      class="img"
+                      fit="contain"
+                      :src="item1.type===1?item1.logo_url:sceneImg"/>
+                    <span v-if="item1.status===3" class="mask">{{$t('scene.offLine')}}</span>
+                    <span v-if="item1.status===2" class="mask">{{$t('scene.deleted')}}</span>
+                  </div>
+                </div>
+              </div>
+              <van-icon class="wapNavIcon" size=".5rem" color="#94A5BE" v-if="!isSort" name="wap-nav" />
             </div>
-          </div>
+          </draggable>
         </div>
       </div>
       <!-- 没有场景 -->
@@ -166,6 +173,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import draggable from 'vuedraggable'
 
 const timingImg = require('../../assets/icon-timing.png')
 const deviceImg = require('../../assets/icon-device.png')
@@ -176,6 +184,9 @@ const emptyPower = require('../../assets/empty-power.png')
 
 export default {
   name: 'scene',
+  components: {
+    draggable
+  },
   data() {
     return {
       loading: false,
@@ -185,10 +196,15 @@ export default {
       empty,
       emptyPower,
       sceneImg,
+      sceneTypeList: [
+        { name: this.$t('scene.manual'), type: 'manual' },
+        { name: this.$t('scene.automatic'), type: 'automatic' }
+      ],
+      activeType: 'manual',
       manualList: [],
       autoRunList: [],
-      manualCon: null,
-      automaticCon: null,
+      sceneType: null,
+      isSort: true,
       position: 0
     }
   },
@@ -329,14 +345,34 @@ export default {
     // 获取滚动条与顶端距离
     scroll(event) {
       this.position = event.target.scrollTop
+    },
+    // 排序
+    sort() {
+      if (this.isSort) {
+        this.isSort = !this.isSort
+      } else {
+        let sceneIds = []
+        if (this.activeType === 'manual') {
+          sceneIds = this.manualList.map(item => item.id)
+        } if (this.activeType === 'automatic') {
+          sceneIds = this.autoRunList.map(item => item.id)
+        }
+        this.http.scenesSort({ scene_ids: sceneIds }).then((res) => {
+          this.loading = false
+          if (res.status !== 0) {
+            return
+          }
+          this.isSort = !this.isSort
+          this.getSceneList()
+        })
+      }
     }
   },
   created() {
     this.getSceneList()
   },
   mounted() {
-    this.manualCon = this.$refs.manualCon
-    this.automaticCon = this.$refs.automaticCon
+    this.sceneType = this.$refs.sceneType
     this.$nextTick(() => {
       // 实现滚动效果
       setTimeout(() => {
@@ -407,18 +443,23 @@ export default {
   .scene-box{
     padding: 0 .3rem;
     .scene-type-box {
-      .type-name{
-        font-size: .3rem;
-        font-weight: 400;
-        color: #94A5BE;
-        padding: .3rem 0;
-        background: #f6f8fd;
+      .scene-type-header{
+        margin-bottom: .2rem;
+        .van-tabs{
+          width: 2rem;
+        }
+        .sort{
+          height: .88rem;
+          display: flex;
+          align-items: center;
+        }
       }
       .type-item {
         background: #ffffff;
         border-radius: .2rem;
         padding: .3rem .3rem;
         margin-bottom: .2rem;
+        position: relative;
         overflow: hidden;
         .item-list{
           display: flex;
@@ -482,6 +523,16 @@ export default {
             }
           }
         }
+        .van-icon{
+          position: absolute;
+          top: 50%;
+          right: .3rem;
+          margin-top: -.25rem;
+        }
+      }
+      .type-item.classify{
+        padding-right: 1rem;
+        box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
       }
     }
   }
@@ -491,6 +542,7 @@ export default {
     align-items: center;
     box-sizing: border-box;
     width: 100%;
+    min-height: .6rem;
     overflow: hidden;
     color: #323233;
     background-color: #fff;
@@ -549,8 +601,12 @@ export default {
     }
 </style>
 <style scoped>
-  .scene-type-box >>> .van-sticky--fixed .type-name{
-    padding: .3rem .3rem;
+  .scene-type-box >>> .van-sticky--fixed .scene-type-header{
+    background: #f6f8fd;
+    padding: 0 .3rem;
+  }
+  .scene-type-box >>> .van-tabs__line {
+    background: #2DA3F6;
   }
 </style>
 <style>

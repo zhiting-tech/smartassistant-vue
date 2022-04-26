@@ -11,6 +11,7 @@ export const global = {
   editSuccess: 'edit successfully',
   delSuccess: 'successfully deleted',
   traSuccess: 'Successfully transferred',
+  addSuccess: 'Successfully added',
   delSuccessChecked: 'The family has been deleted, and the files stored in the Zhiting Cloud Disk have been deleted at the same time',
   isDelChecked: 'At the same time delete files stored in Zhiting Cloud Disk',
   add: 'add',
@@ -38,6 +39,9 @@ export const global = {
   day: 'Day',
   hour: 'Hour',
   minute: 'Minute',
+  second: 'Second',
+  now: 'Now',
+  timing: 'Timing',
   tra: 'Transfer owner',
   loadingVerify: 'Crating verify...',
   powerName: 'Switch',
@@ -56,6 +60,11 @@ export const global = {
   updateSuccess: 'update completed',
   updateFail: 'update failed',
   deleting: 'deleting...',
+  quit: 'quit',
+  departmentPlaceholder: 'Please select a department',
+  rolePlaceholder: 'Please select a role',
+  remark: 'remark',
+  fail: 'fail'
 }
 
 export const home = {
@@ -73,13 +82,21 @@ export const owner = {
   sheetTitle: 'Switch language',
   zh: 'chinese',
   en: 'english',
-  powerTitle: 'authority management',
-  certificate: 'retrieve user credentials',
+  powerTitle: 'advanced settings',
+  certificate: 'user credentials',
   certificateTip: 'the user credential is the key to access the smart center. Please select whether to allow members to retrieve the credential through the cloud.',
+  certificateAppTitle: 'zhiting Family Cloud Certificate',
+  certificateAppTip: 'issued to clients when members join the family',
   certificateTitle1: 'allow to retrieve',
-  certificateDesc1: 'members can connect to the smart center on any mobile phone/tablet',
+  certificateDesc1: 'members can retrieve their credentials on any client to connect to the smart center',
   certificateTitle2: 'not allowed to retrieve',
-  certificateDesc2: 'members cannot connect again after changing their mobile phones/tablets or uninstalling the APP',
+  certificateDesc2: 'members can connect to the smart center on a client with credentials, but cannot connect again after uninstalling the APP',
+  certificatePanAppTitle: 'zhiting Cloud Disk Certificate',
+  certificatePanAppTip: 'issued to the client when the member is authorized to log in or log in to the cloud account',
+  panCertificateTitle1: 'allow access',
+  panCertificateDesc1: 'members can log in to the cloud account to obtain credentials to connect to the smart center',
+  panCertificateTitle2: 'not allowed',
+  panCertificateDesc2: 'members cannot log in to the cloud account to obtain credentials to connect to the smart center, and can only obtain credentials through authorized login',
   certificateSetTip: 'you can go to the Professional Edition-Home-Smart Center to modify the selected items',
   log: 'log',
   backup: 'data backup',
@@ -99,8 +116,6 @@ export const owner = {
   backupConfirmSecTitle: 'restore the backup data to replace the current data, are you sure you want to continue?',
   backupConfirmContent: '* recovery takes a certain time, and the smart center will be suspended during the recovery process, and it can be used normally after the recovery is over',
   backupDelSecTitle: 'the backup data cannot be retrieved after deletion. Are you sure you want to continue?',
-  backupLocation: 'backup location: system disk-system partition',
-  backupData: 'the following data will be backed up: all data',
   backupMarkTip: '* the smart center will be temporarily suspended during the backup process, and it can be used normally after the backup is over',
   backupMarkPlaceholder: 'please enter remarks',
   backupStart: 'start backup',
@@ -115,14 +130,31 @@ export const owner = {
   backupFailReason: 'reason for failure',
   recoverSuccess: 'successful recovery',
   recoverFail: 'recovery failed',
-  protocol: 'User Agreement and Privacy Policy'
+  protocol: 'User Agreement and Privacy Policy',
+  experience: 'Experience center',
+  customerManagement: 'Customer Management',
+  scmManagement: 'Supply Chain Management',
+  remoteHelp: 'Remote Assistance',
+  remoteHelpTips: 'After it is turned on, Zhiting technicians can remotely control your smart center for diagnosis and repair. Are you sure to turn it on?',
+  onRemoteHelp: 'Remote Assistance is on',
+  offRemoteHelp: 'Remote Assistance is off',
+  selectFileRecovery: 'Select file recovery',
+  scheduleBackup: 'Schedule a backup',
+  backupLocation: 'Backup location',
+  backupData: 'Backup data',
+  allData: 'All data',
+  internalStorage: 'internal storage',
+  smartCenterData: 'Smart Center data',
+  wangpanData: 'Wangpan data',
+  crmData: 'Customer management data',
+  scmData: 'Supply Chain Management Data',
 }
 
 export const discover = {
   title: 'Add device',
   scan: 'Scanning',
-  tip1: '1. Please make sure that the device is connected to the power supply and has been reset',
-  tip2: '2. When adding a certain brand of equipment for the first time, please enter [I-Support Brand] to add the brand',
+  tip1: '1.Please make sure that the device is connected to the power source and connected to the local area network;',
+  tip2: '2.When adding a brand for the first time, please enter [I-Support Brand] to add the brand;',
   add: 'Add',
   empty: 'Device not found',
   retry: 'Rescan'
@@ -133,17 +165,18 @@ export const connect = {
   connect: 'Device connecting',
   success: 'connection succeeded!',
   fail: 'Connection failed!',
-  retry: 'Rescan'
+  retry: 'retry'
 }
 
-export const areadetail = {
+export const areaDetail = {
   title: 'Family/Company',
   name: 'name',
-  area: 'room/area',
+  area: 'room',
   code: 'qr code',
+  department: 'department',
   verify: 'Verification Code',
   role: 'roles',
-  quit: 'Leave the family',
+  quitFamily: 'Leave the family',
   member: 'member',
   man: 'people',
   sheetTitle: 'Family/Company Name',
@@ -154,6 +187,7 @@ export const areadetail = {
   roleTitle: 'Choose a role',
   roleTip1: 'Invitation code',
   roleTip2: 'Select a role and generate an invitation code to invite friends to join. The invitation code is valid within 10 minutes',
+  roleTip3: 'Select a department and role and generate an invitation code to invite employees to join. The invitation code is valid within 10 minutes',
   invite: 'Generate invitation code',
   empty: 'please enter the family name',
   inviteTip: 'the invitation code has been generated, please invite friends to join',
@@ -162,26 +196,30 @@ export const areadetail = {
   tapTip: 'long press to save to album',
   joinTip: 'invite you to join',
   creat: 'Creat',
-  effective: 'The valid time of captcha is 10 minutes'
+  effective: 'The valid time of captcha is 10 minutes',
+  disband: 'Dissolve the company',
+  quitCompany: 'Leave the company',
+  tips: 'Hint',
+  deleteArea: 'It takes a certain amount of time to delete data and cloud disk files, and it has been running in the background for you. Please go to the home page of the APP to switch home/company to check the deletion status.'
 }
 
-export const locationmanage = {
-  title: 'Room/area management',
+export const locationManage = {
+  title: 'Room',
   edit: 'edit',
   finish: 'finish',
   empty: 'No room available',
-  add: 'add room/area',
-  sheetTitle: 'Room/area name',
+  add: 'add room',
+  sheetTitle: 'Room name',
   emptyTip: 'please enter the room name',
   repeatTip: 'duplicate room name'
 }
 
-export const locationdevice = {
-  title: 'Room/area ',
+export const locationDevice = {
+  title: 'Room detail ',
   del: 'delete',
   name: 'name',
   tip: 'room device',
-  sheetTitle: 'Room/area name',
+  sheetTitle: 'Room name',
   delTitle: 'Are you sure to delete this room?',
   delContent: 'deleting a room will not delete the equipment in the room',
   emptyTip: 'please enter the room name'
@@ -189,12 +227,12 @@ export const locationdevice = {
 
 export const locationsetting = {
   title: 'Setting',
-  add: 'add room/area',
+  add: 'add room',
   tip1: 'device name',
   placeholder: 'please enter the device name',
   tip2: 'device location',
   finish: 'finish',
-  sheetTitle: 'Room/area name',
+  sheetTitle: 'Room',
   emptyTip: 'please enter the room name',
   repeatTip: 'duplicate room name',
   deviceEmpty: 'please enter the device name',
@@ -278,22 +316,26 @@ export const devicedetail = {
   isUpdate: 'whether to upgrade'
 }
 
-export const devicemanage = {
+export const deviceManage = {
   name: 'device name',
   position: 'device location',
   plugin: 'associated plugin',
   del: 'delete device',
   delTitle: 'are you sure you want to delete the device',
   empty: 'please enter the device name',
-  modify: 'successfully modified'
+  modify: 'successfully modified',
+  changeIcon: 'Change icon'
 }
 
 export const membermanage = {
   title: 'Member information',
   role: 'roles',
   sheetTitle: 'Choose a role',
+  sheetTitle2: 'Choose a department',
   delTitle: 'are you sure to delete this member?',
-  modify: 'successfully modified'
+  modify: 'successfully modified',
+  department: 'department',
+  undivided: 'undivided'
 }
 
 export const plugindetail = {
@@ -320,16 +362,18 @@ export const register = {
   success: 'authentication is successful'
 }
 
-export const roleadd = {
+export const roleAdd = {
   addTitle: 'Add role',
   editTitle: 'Edit role',
   placeholder: 'please enter the role name',
   label: 'this role can operate:',
   device: 'device',
   advance: 'advanced settings',
-  area: 'family/company',
+  family: 'family',
+  company: 'company',
   selectAll: 'select all',
-  location: 'room/area',
+  room: 'room',
+  department: 'department',
   role: 'roles',
   scene: 'scene',
   delTitle: 'confirm to delete?',
@@ -387,7 +431,7 @@ export const scene = {
   deleted: 'Deleted',
   offLine: 'Off-line',
   effictiveTimeTitle: 'Effective time',
-  conditionTitle: 'Controlling device'
+  conditionTitle: 'When the equipment changes'
 }
 
 export const creatScene = {
@@ -495,7 +539,7 @@ export const effectiveTime = {
 export const condition = {
   switch: 'switch',
   brightness: 'brightness',
-  temperature: 'temperature',
+  colorTemperature: 'color temperature',
   hue: 'hue',
   saturation: 'saturation',
   rgb: 'rgb',
@@ -515,7 +559,29 @@ export const condition = {
   curtainState: 'open state',
   curtainOpen: 'open the curtains',
   curtainClose: 'close the curtains',
-  curtianPercent: 'percentage of curtains opened'
+  curtianPercent: 'percentage of curtains opened',
+  temperature: 'temperature',
+  humidity: 'humidity',
+  isDetected: 'motion is detected',
+  offToOn: 'off to on',
+  onToOff: 'on to off',
+  isLeakDetected: 'flooding detected',
+  color: 'color',
+  firstSwitchOn: 'One-click open',
+  firstSwitchOff: 'One-click close',
+  secondSwitchOn: 'Two-click open',
+  secondSwitchOff: 'Two-click close',
+  thirdSwitchOn: 'Three-click open',
+  thirdSwitchOff: 'Three-click close',
+  guard: 'Guard',
+  openAtHome: 'Turn on at home mode',
+  openLeaveHome: 'Turn on away from home mode',
+  openSleep: 'Turn on sleep mode',
+  closeGuard: 'Turn off daemon mode',
+  singlePress: 'Single press',
+  doublePress: 'Double press',
+  longPress: 'Long press',
+  state: 'State',
 }
 
 export const transferOwner = {
@@ -525,12 +591,32 @@ export const transferOwner = {
 }
 
 export const deviceAttr = {
-  power: 'power',
-  templature: 'templature',
-  brightness: 'brightness',
-  hue: 'hue',
-  saturation: 'saturation',
-  rgb: 'rgb'
+  power: 'Power',
+  colorTemperature: 'Color temperature',
+  brightness: 'Brightness',
+  hue: 'Hue',
+  saturation: 'Saturation',
+  lantern: 'Lantern',
+  temperature: 'Temperature',
+  humidity: 'Humidity',
+  detected: 'State',
+  windowDoorClose: 'State',
+  leakDetected: 'State',
+  targetState: 'Guard',
+  powers1: 'One Key',
+  powers2: 'Two keys',
+  powers3: 'Three keys',
+  curtainState: 'Curtain state',
+  state: 'State',
+  style: 'Style',
+  direction: 'Direction',
+  calibration: 'Calibration',
+  switchEvent: 'Power',
+  onOff: 'On off',
+  volume: 'Volume',
+  contactSensorState: 'State',
+  motionDetected: 'State',
+  statusLowBattery: 'Low battery state'
 }
 
 export const protocol = {
@@ -539,4 +625,41 @@ export const protocol = {
   userAgreement: 'User Agreement',
   agreementTitle: 'User Agreement',
   privacyTitle: 'Privacy Policy'
+}
+
+export const departmentManage = {
+  title: 'Department',
+  edit: 'Edit',
+  finish: 'Finish',
+  empty: 'No department',
+  add: 'Add department',
+  sheetTitle: 'Department name',
+  emptyTip: 'Please enter the department name',
+  repeatTip: 'Duplicate department name',
+  man: 'people'
+}
+
+export const departmentDetail = {
+  title: 'Department',
+  empty: 'No members',
+  add: 'Add member',
+  member: 'members',
+  man: 'man',
+  set: 'Department setting',
+  emptyTip: 'Please enter the department name',
+}
+
+export const departmentSetting = {
+  title: 'Department setting',
+  deleteDepartment: 'Delete department',
+  departmentName: 'Department name',
+  departmentHead: 'Department Head',
+  nameEmpty: 'Please set the department name',
+  quitTip: 'The information is not saved, do you want to exit?',
+  delTitle: 'Are you sure to delete this department?',
+  delContent: 'Deleting the department will not delete the members!'
+}
+
+export const experienceCenter = {
+  title: 'Experience Center'
 }

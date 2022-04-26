@@ -20,19 +20,19 @@
     <div class="role-box">
       <input
         v-model="roleName"
-        :placeholder="$t('roleadd.placeholder')"
+        :placeholder="$t('roleAdd.placeholder')"
         maxlength="20"
         class="role-name"/>
-      <p class="label-word">{{ $t('roleadd.label') }}</p>
-      <div class="role-part">
+      <p class="label-word">{{ $t('roleAdd.label') }}</p>
+      <div class="role-part" v-if="deviceRoleList.length>0">
         <div class="role-top clearfix">
-          <h3 class="float-l">{{ $t('roleadd.device') }}</h3>
+          <h3 class="float-l">{{ $t('roleAdd.device') }}</h3>
           <p
             @click="selectAll(deviceRoleList)"
             class="float-r"
             :class="[whichClass(deviceRoleList)]">
-            <span @click.stop="advanceShow = true" class="setting">{{ $t('roleadd.advance') }}</span>
-            {{ $t('roleadd.selectAll') }}
+            <span @click.stop="advanceShow = true" class="setting">{{ $t('roleAdd.advance') }}</span>
+            {{ $t('roleAdd.selectAll') }}
           </p>
         </div>
         <div class="role-list">
@@ -44,13 +44,13 @@
             @click="selectSingle(item)">{{ item.permission.name }}</div>
         </div>
       </div>
-      <div class="role-part">
+      <div class="role-part" v-if="areaRoleList.length>0">
         <div class="role-top clearfix">
-          <h3 class="float-l">{{ $t('roleadd.area') }}</h3>
+          <h3 class="float-l">{{ $t('roleAdd.family') }}</h3>
           <p
             @click="selectAll(areaRoleList)"
             class="float-r"
-            :class="[whichClass(areaRoleList)]">{{ $t('roleadd.selectAll') }}</p>
+            :class="[whichClass(areaRoleList)]">{{ $t('roleAdd.selectAll') }}</p>
         </div>
         <div class="role-list">
           <div
@@ -61,13 +61,30 @@
             @click="selectSingle(item)">{{ item.permission.name }}</div>
         </div>
       </div>
-      <div class="role-part">
+      <div class="role-part" v-if="companyRoleList.length>0">
         <div class="role-top clearfix">
-          <h3 class="float-l">{{ $t('roleadd.location') }}</h3>
+          <h3 class="float-l">{{ $t('roleAdd.company') }}</h3>
+          <p
+            @click="selectAll(companyRoleList)"
+            class="float-r"
+            :class="[whichClass(companyRoleList)]">{{ $t('roleAdd.selectAll') }}</p>
+        </div>
+        <div class="role-list">
+          <div
+            v-for="item in companyRoleList"
+            :key="item.permission.name"
+            class="role-item one-line"
+            :class="{ 'active': item.allow }"
+            @click="selectSingle(item)">{{ item.permission.name }}</div>
+        </div>
+      </div>
+      <div class="role-part" v-if="locationRoleList.length>0">
+        <div class="role-top clearfix">
+          <h3 class="float-l">{{ $t('roleAdd.room') }}</h3>
           <p
             @click="selectAll(locationRoleList)"
             class="float-r"
-            :class="[whichClass(locationRoleList)]">{{ $t('roleadd.selectAll') }}</p>
+            :class="[whichClass(locationRoleList)]">{{ $t('roleAdd.selectAll') }}</p>
         </div>
         <div class="role-list">
           <div
@@ -78,13 +95,30 @@
             @click="selectSingle(item)">{{ item.permission.name }}</div>
         </div>
       </div>
-      <div class="role-part">
+      <div class="role-part" v-if="departmentRoleList.length>0">
         <div class="role-top clearfix">
-          <h3 class="float-l">{{ $t('roleadd.scene') }}</h3>
+          <h3 class="float-l">{{ $t('roleAdd.department') }}</h3>
+          <p
+            @click="selectAll(departmentRoleList)"
+            class="float-r"
+            :class="[whichClass(departmentRoleList)]">{{ $t('roleAdd.selectAll') }}</p>
+        </div>
+        <div class="role-list">
+          <div
+            v-for="item in departmentRoleList"
+            :key="item.permission.name"
+            class="role-item one-line"
+            :class="{ 'active': item.allow }"
+            @click="selectSingle(item)">{{ item.permission.name }}</div>
+        </div>
+      </div>
+      <div class="role-part" v-if="sceneRoleList.length>0">
+        <div class="role-top clearfix">
+          <h3 class="float-l">{{ $t('roleAdd.scene') }}</h3>
           <p
             @click="selectAll(sceneRoleList)"
             class="float-r"
-            :class="[whichClass(sceneRoleList)]">{{ $t('roleadd.selectAll') }}</p>
+            :class="[whichClass(sceneRoleList)]">{{ $t('roleAdd.selectAll') }}</p>
         </div>
         <div class="role-list">
           <div
@@ -95,13 +129,13 @@
             @click="selectSingle(item)">{{ item.permission.name }}</div>
         </div>
       </div>
-      <div class="role-part">
+      <div class="role-part" v-if="roleList.length>0">
         <div class="role-top clearfix">
-          <h3 class="float-l">{{ $t('roleadd.role') }}</h3>
+          <h3 class="float-l">{{ $t('roleAdd.role') }}</h3>
           <p
             @click="selectAll(roleList)"
             class="float-r"
-            :class="[whichClass(roleList)]">{{ $t('roleadd.selectAll') }}</p>
+            :class="[whichClass(roleList)]">{{ $t('roleAdd.selectAll') }}</p>
         </div>
         <div class="role-list">
           <div
@@ -134,8 +168,8 @@
       :before-close="handleConfirm"
       confirm-button-color="#2DA3F6"
       cancel-button-color="#94A5BE">
-      <h3 class="delete-title">{{ $t('roleadd.delTitle') }}</h3>
-      <p class="delete-tip">{{ $t('roleadd.delContent') }}</p>
+      <h3 class="delete-title">{{ $t('roleAdd.delTitle') }}</h3>
+      <p class="delete-tip">{{ $t('roleAdd.delContent') }}</p>
     </van-dialog>
   </div>
 </template>
@@ -167,9 +201,9 @@ export default {
     ...mapGetters(['permissions']),
     title() {
       if (this.roleId) {
-        return this.$t('roleadd.editTitle')
+        return this.$t('roleAdd.editTitle')
       }
-      return this.$t('roleadd.addTitle')
+      return this.$t('roleAdd.addTitle')
     },
     canSave() {
       return this.roleName.trim() !== ''
@@ -191,6 +225,12 @@ export default {
     },
     deviceAdvanced() {
       return this.roleDetail.device_advanced || {}
+    },
+    companyRoleList() {
+      return this.roleDetail.company || []
+    },
+    departmentRoleList() {
+      return this.roleDetail.department || []
     },
     // 控制设备 用于监听
     controlDevice() {
@@ -262,18 +302,31 @@ export default {
     // 权限高级联动
     handleDevicePermission(control) {
       const { permission } = control
-      const { locations } = this.deviceAdvanced
-      // 修改设备
-      locations.forEach((area) => {
-        area.devices.forEach((device) => {
-          const permissions = device.permissions || []
-          permissions.forEach((per) => {
-            if (per.permission.action === permission.action) {
-              per.allow = control.allow
-            }
+      if (this.deviceAdvanced.locations) {
+        this.deviceAdvanced.locations.forEach((area) => {
+          area.devices.forEach((device) => {
+            const permissions = device.permissions || []
+            permissions.forEach((per) => {
+              if (per.permission.action === permission.action) {
+                per.allow = control.allow
+              }
+            })
           })
         })
-      })
+      }
+      if (this.deviceAdvanced.departments) {
+        // 修改设备
+        this.deviceAdvanced.departments.forEach((department) => {
+          department.devices.forEach((device) => {
+            const permissions = device.permissions || []
+            permissions.forEach((per) => {
+              if (per.permission.action === permission.action) {
+                per.allow = control.allow
+              }
+            })
+          })
+        })
+      }
     },
     // 样式控制
     whichClass(list) {
@@ -343,8 +396,10 @@ export default {
         && !this.locationRoleList.find(item => item.allow)
         && !this.sceneRoleList.find(item => item.allow)
         && !this.roleList.find(item => item.allow)
+        && !this.companyRoleList.find(item => item.allow)
+        && !this.departmentRoleList.find(item => item.allow)
       ) {
-        this.$toast(this.$t('roleadd.roleEerror'))
+        this.$toast(this.$t('roleAdd.roleEerror'))
         return false
       }
       return true
@@ -361,7 +416,9 @@ export default {
         location: this.locationRoleList,
         scene: this.sceneRoleList,
         role: this.roleList,
-        device_advanced: this.deviceAdvanced
+        device_advanced: this.deviceAdvanced,
+        company: this.companyRoleList,
+        department: this.departmentRoleList
       }
       const params = {
         name,

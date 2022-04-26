@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <van-nav-bar
-      :title="$t('areadetail.title')"
+      :title="title"
       left-arrow
       :fixed="true"
       :placeholder="true"
@@ -14,48 +14,55 @@
     <Loading v-if="loading"></Loading>
     <template v-else>
       <div class="detail-box">
-        <div class="item clearfix" @click="permissions.update_area_name ? show = true : noPermissionTip()">
-          <span class="item__label one-line float-l">{{ $t('areadetail.name') }}</span>
+        <div class="item clearfix" @click="permissions.update_area_name || permissions.update_area_company_name ? show = true : noPermissionTip()">
+          <span class="item__label one-line float-l">{{ $t('areaDetail.name') }}</span>
           <p class="item__name float-r">
             <span class="one-line">{{ areaInfo.name }}</span>
             <van-icon name="arrow" class="item__icon"/>
           </p>
         </div>
-        <div @click="toAreaManage" class="item clearfix">
-          <span class="item__label one-line float-l">{{ $t('areadetail.area') }}</span>
+        <div v-if="userInfo.area_type === 1" @click="toAreaManage" class="item clearfix">
+          <span class="item__label one-line float-l">{{ $t('areaDetail.area') }}</span>
           <span class="item__name float-r">
-            {{ areaInfo.location_count }}
+            {{ areaInfo.location_count ?areaInfo.location_count : '' }}
             <van-icon name="arrow" class="item__icon"/>
           </span>
         </div>
-        <div v-if="permissions.get_area_invite_code" @click="sceneShow = true" class="item clearfix">
-          <span class="item__label one-line float-l">{{ $t('areadetail.code') }}</span>
+        <div v-if="permissions.get_area_invite_code" @click="userInfo.area_type === 1?sceneShow = true:departmentSceneShow = true" class="item clearfix">
+          <span class="item__label one-line float-l">{{ $t('areaDetail.code') }}</span>
           <span class="item__name float-r">
+            <van-icon name="arrow" class="item__icon"/>
+          </span>
+        </div>
+        <div v-if="userInfo.area_type === 2" @click="toDepartmentManage" class="item clearfix">
+          <span class="item__label one-line float-l">{{ $t('areaDetail.department') }}</span>
+          <span class="item__name float-r">
+            {{ areaInfo.department_count }}
             <van-icon name="arrow" class="item__icon"/>
           </span>
         </div>
         <div @click="permissions.get_role ? toRoleList() : noPermissionTip()" class="item clearfix">
-          <span class="item__label one-line float-l">{{ $t('areadetail.role') }}</span>
+          <span class="item__label one-line float-l">{{ $t('areaDetail.role') }}</span>
           <span class="item__name float-r">
             {{ areaInfo.role_count }}
             <van-icon name="arrow" class="item__icon"/>
           </span>
         </div>
         <div class="item clearfix" v-if="userInfo.is_owner">
-          <span class="item__label one-line float-l">{{ $t('areadetail.verify') }}</span>
+          <span class="item__label one-line float-l">{{ $t('areaDetail.verify') }}</span>
           <span class="item__name float-r">
-            <van-button type="info" size="small" @click="getVerify()">{{ $t('areadetail.creat') }}</van-button>
+            <van-button type="info" size="small" @click="getVerify()">{{ $t('areaDetail.creat') }}</van-button>
           </span>
         </div>
       </div>
       <div v-if="MemberList.length" class="role-list">
-        <div class="role-title">{{ $t('areadetail.member') }}（{{ MemberList.length }}{{ $t('areadetail.man') }}）</div>
+        <div class="role-title">{{ $t('areaDetail.member') }}（{{ MemberList.length }}{{ $t('areaDetail.man') }}）</div>
         <div
           v-for="member in MemberList"
           :key="member.user_id" class="role-item"
           @click="toMemberManage(member.user_id)">
           <div class="role-left">
-            <img src="../../assets/default-header.png">
+            <img :src="member.avatar_url?member.avatar_url:faceHeader">
           </div>
           <div class="role-right">
             <p class="user-name">{{ member.nickname }}</p>
@@ -68,12 +75,12 @@
       <template v-if="!isInsert">
         <div class="op-btn-placeholder" v-if="!userInfo.is_owner">
           <div class="op-btn-box">
-            <button @click="handleQuit" class="op-btn">{{ $t('areadetail.quit') }}</button>
+            <button @click="handleQuit" class="op-btn">{{ userInfo.area_type === 2?$t('areaDetail.quitCompany'):$t('areaDetail.quitFamily') }}</button>
           </div>
         </div>
         <div class="op-btn-placeholder" v-else>
           <div class="op-btn-box">
-            <button @click="handleDelete" class="op-btn">{{ $t('global.del') }}</button>
+            <button @click="handleDelete" class="op-btn">{{ userInfo.area_type === 2?$t('areaDetail.disband'):$t('global.del') }}</button>
           </div>
         </div>
       </template>
@@ -81,7 +88,7 @@
     <!--修改名称弹窗-->
     <NameSheet
       v-model="show"
-      :title="$t('areadetail.sheetTitle')"
+      :title="$t('areaDetail.sheetTitle')"
       :init="areaInfo.name"
       :loading="nameLoading"
       @on-confirm="editAreaName"/>
@@ -102,12 +109,12 @@
     <div class="sheet-part">
       <van-action-sheet
         v-model="sceneShow"
-        :title="$t('areadetail.roleTitle')">
+        :title="$t('areaDetail.roleTitle')">
         <div class="sheet-role-wrap">
           <div class="sheet-title-placeholder">
             <div class="sheet-title">
-              <h3>{{ $t('areadetail.roleTip1') }}</h3>
-              <p>{{ $t('areadetail.roleTip2') }}</p>
+              <h3>{{ $t('areaDetail.roleTip1') }}</h3>
+              <p>{{ $t('areaDetail.roleTip2') }}</p>
             </div>
           </div>
           <div class="role-scroll-box">
@@ -141,10 +148,10 @@
               <van-button
                 class="invite-btn"
                 :loading="makeLoading"
-                :loading-text="$t('areadetail.invite')"
+                :loading-text="$t('areaDetail.invite')"
                 :disabled="makeLoading"
                 :class="{ 'disabled': !result.length }"
-                @click="makeInviteCode">{{ $t('areadetail.invite') }}</van-button>
+                @click="makeInviteCode">{{ $t('areaDetail.invite') }}</van-button>
             </div>
           </div>
         </div>
@@ -164,10 +171,131 @@
       cancel-button-color="#94A5BE"
       :cancelButtonText="$t('global.copy')"
       :confirmButtonText="$t('global.confirm')">
-      <h3 class="verify-title">{{ $t('areadetail.verify') }}</h3>
-      <p class="verify-tips">{{ $t('areadetail.effective') }}</p>
+      <h3 class="verify-title">{{ $t('areaDetail.verify') }}</h3>
+      <p class="verify-tips">{{ $t('areaDetail.effective') }}</p>
       <div class="verify-code">
         <p>{{verifyCode}}</p>
+      </div>
+    </van-dialog>
+    <!-- 公司添加部门跟角色生成二维码 -->
+    <div class="sheet-part">
+      <van-action-sheet
+        v-model="departmentSceneShow"
+        :title="$t('areaDetail.roleTitle')">
+        <div class="invite-target-wrap">
+          <div class="invite-target-title">
+            <h3>{{ $t('areaDetail.roleTip1') }}</h3>
+            <p>{{ $t('areaDetail.roleTip3') }}</p>
+          </div>
+          <div class="invite-target-box">
+            <van-cell :value="departmentName" is-link value-class="content" @click="departmentShow = true">
+              <template #title>
+                <span class="custom-title">{{$t('areaDetail.department')}}</span>
+              </template>
+            </van-cell>
+            <van-cell :value="roleName" is-link value-class="content" @click="roleShow = true">
+              <template #title>
+                <span class="custom-title">{{$t('areaDetail.role')}}</span>
+              </template>
+            </van-cell>
+          </div>
+          <div class="invite-btn-placeholder">
+            <div class="invite-btn-box">
+              <van-button
+                class="invite-btn"
+                :loading="makeLoading"
+                :loading-text="$t('areaDetail.invite')"
+                :disabled="makeLoading"
+                :class="{ 'disabled': !result.length }"
+                @click="makeInviteCode">{{ $t('areaDetail.invite') }}</van-button>
+            </div>
+          </div>
+        </div>
+      </van-action-sheet>
+    </div>
+    <!--选择部门-->
+    <div class="department-part">
+      <van-action-sheet v-model="departmentShow" :title="$t('areaDetail.department')">
+        <div class="content">
+          <div class="department-list">
+            <van-radio-group v-model="selectId">
+              <van-cell-group >
+                <van-cell v-for="(member,index) in departmentList" :key="index" clickable @click="selectId = member.id">
+                  <template #title>
+                    <div class="department-item">
+                      <div class="user-name one-line">
+                        {{ member.name }}
+                      </div>
+                    </div>
+                  </template>
+                  <template #right-icon>
+                    <van-radio :name="member.id" />
+                  </template>
+                </van-cell>
+              </van-cell-group>
+            </van-radio-group>
+          </div>
+          <div class="btn-box">
+            <van-button
+              type="default"
+              block
+              @click="handleSure('department')"
+              :disabled="!selectId">
+              {{ $t('global.confirm') }}</van-button>
+          </div>
+        </div>
+      </van-action-sheet>
+    </div>
+    <!--选择角色-->
+    <div class="role-part">
+      <van-action-sheet v-model="roleShow" :title="$t('areaDetail.role')">
+        <div class="content">
+          <div class="role-list">
+            <van-checkbox-group v-model="result">
+              <van-cell-group>
+                <van-cell
+                  v-for="(role, index) in roleList"
+                  :key="role.value"
+                  clickable
+                  @click="toggle(index)">
+                  <template #title>
+                    <p class="sheet-role-title" :class="{ 'sheet-role-active': result.includes(role.id) }">
+                      <span class="sheet-role-name one-line float-l">
+                        {{ role.name }}
+                      </span>
+                    </p>
+                  </template>
+                  <template #right-icon>
+                    <van-checkbox :name="role.id" ref="checkboxes">
+                      <template #icon="props">
+                        <img class="img-icon" :src="props.checked ? activeIcon : inactiveIcon" />
+                      </template>
+                    </van-checkbox>
+                  </template>
+                </van-cell>
+              </van-cell-group>
+            </van-checkbox-group>
+          </div>
+          <div class="btn-box">
+            <van-button
+              type="default"
+              block
+              @click="handleSure('role')"
+              :disabled="!result.length">
+              {{ $t('global.confirm') }}</van-button>
+          </div>
+        </div>
+      </van-action-sheet>
+    </div>
+    <!--删除成功弹窗-->
+    <van-dialog
+      v-model="delSuccess"
+      :before-close="sureConfirm"
+      confirm-button-color="#2DA3F6"
+      cancel-button-color="#94A5BE">
+      <h3 class="delete-title">{{ $t('areaDetail.tips') }}</h3>
+      <div class="delete-tip">
+        <p>{{ $t('areaDetail.deleteArea') }}</p>
       </div>
     </van-dialog>
   </div>
@@ -180,6 +308,7 @@ import InviteCode from './components/InviteCode.vue'
 
 const activeIcon = require('../../assets/check-box-icon.png')
 const inactiveIcon = require('../../assets/uncheck-box-icon.png')
+const faceHeader = require('../../assets/default-header.png')
 
 export default {
   name: 'areaDetail',
@@ -201,6 +330,7 @@ export default {
       result: [], // 选择生成的角色
       activeIcon,
       inactiveIcon,
+      faceHeader,
       inviteShow: false, // 邀请弹窗控制
       roleList: [], // 角色列表
       MemberList: [], // 成员列表
@@ -208,24 +338,40 @@ export default {
       userName: '', // 用户名称
       position: 0,
       verifyShow: false,
-      verifyCode: '345fos'
+      verifyCode: '345fos',
+      departmentSceneShow: false,
+      departmentName: this.$t('global.departmentPlaceholder'),
+      roleName: this.$t('global.rolePlaceholder'),
+      departmentId: 0,
+      selectId: 0,
+      finishLoading: false,
+      departmentList: [],
+      departmentShow: false,
+      roleShow: false,
+      delSuccess: false
     }
   },
   computed: {
     ...mapGetters(['area', 'userInfo', 'permissions', 'isInsert']),
+    title() {
+      if (this.userInfo.area_type === 1) {
+        return this.$t('areaDetail.familyTitle')
+      }
+      return this.$t('areaDetail.companyTitle')
+    },
     id() {
       return this.area.id
     },
     dialogInfo() {
       if (this.dialogType === 'quit') {
         return {
-          title: this.$t('areadetail.quitTitle'),
-          content: this.$t('areadetail.quitContent')
+          title: this.$t('areaDetail.quitTitle'),
+          content: this.$t('areaDetail.quitContent')
         }
       }
       return {
-        title: this.$t('areadetail.delTitle'),
-        content: this.$t('areadetail.delContent'),
+        title: this.$t('areaDetail.delTitle'),
+        content: this.$t('areaDetail.delContent'),
       }
     },
     codeInfo() {
@@ -235,7 +381,14 @@ export default {
       }
     }
   },
-  watch: {},
+  watch: {
+    title() {
+      if (this.userInfo.mode === 1) {
+        return this.$t('areaDetail.familyTitle')
+      }
+      return this.$t('areaDetail.companyTitle')
+    }
+  },
   methods: {
     ...mapActions(['setToken', 'setArea']),
     onClickLeft() {
@@ -244,6 +397,14 @@ export default {
     toAreaManage() {
       this.$router.push({
         name: 'locationManage',
+        query: {
+          id: this.id
+        }
+      })
+    },
+    toDepartmentManage() {
+      this.$router.push({
+        name: 'departmentManage',
         query: {
           id: this.id
         }
@@ -322,15 +483,21 @@ export default {
     makeInviteCode() {
       const userId = this.userInfo.user_id
       const params = {
-        role_ids: this.result
+        role_ids: this.result,
+        department_ids: this.departmentId ? [this.departmentId] : []
       }
       if (!this.result.length) {
-        this.$toast('请选择成员角色')
+        this.$toast(this.$t('global.rolePlaceholder'))
         return
+      }
+      if (this.userInfo.area_type === 2) {
+        if (!this.departmentId) {
+          this.$toast(this.$t('global.departmentPlaceholder'))
+          return
+        }
       }
       this.makeLoading = true
       this.http.getInvitationCode(userId, params).then((res) => {
-        console.log(params, 888)
         this.makeLoading = false
         if (res.status !== 0) {
           return
@@ -339,7 +506,6 @@ export default {
         this.qrCode = qrCode
         this.inviteShow = true
       }).catch(() => {
-        console.log(params, 999)
         this.makeLoading = false
       })
     },
@@ -347,7 +513,7 @@ export default {
     editAreaName(name) {
       const area = name.trim()
       if (area === '') {
-        this.$toast(this.$t('areadetail.empty'))
+        this.$toast(this.$t('areaDetail.empty'))
         return
       }
       const params = {
@@ -387,12 +553,16 @@ export default {
         if (res.status !== 0) {
           return
         }
-        if (this.deleteChecked) {
-          this.$toast(this.$t('global.delSuccessChecked'))
-        } else {
-          this.$toast(this.$t('global.delSuccess'))
+        if (res.data.remove_status === 1) {
+          if (this.deleteChecked) {
+            this.delSuccess = true
+          } else {
+            this.$toast(this.$t('global.delSuccess'))
+            this.$router.push({
+              name: 'professionLogin'
+            })
+          }
         }
-        this.onClickLeft()
       })
     },
     // handleQuit
@@ -428,7 +598,8 @@ export default {
         this.$router.push({
           name: 'memberManage',
           query: {
-            userId
+            userId,
+            type: 'role'
           }
         })
       }, 300)
@@ -474,6 +645,49 @@ export default {
     // 复制
     handleCopy(text, event) {
       clip(text, event)
+    },
+    // 部门列表
+    getDepartmentList() {
+      this.loading = true
+      this.http.departmentsList().then((res) => {
+        this.loading = false
+        if (res.status !== 0) {
+          return
+        }
+        const { departments } = res.data
+        this.departmentList = departments || []
+      }).catch(() => {
+        this.loading = false
+      })
+    },
+    handleSure(type) {
+      if (type === 'department') {
+        this.departmentId = this.selectId
+        this.departmentName = this.departmentList.find(item => item.id === this.departmentId).name || '请选择部门'
+        this.departmentShow = false
+      }
+      if (type === 'role') {
+        const roleList = []
+        this.roleList.forEach((role) => {
+          this.result.forEach((id) => {
+            if (role.id === id) {
+              roleList.push(role)
+            }
+          })
+        })
+        let res = ''
+        roleList.forEach((item) => {
+          res += `${item.name}、`
+        })
+        this.roleName = res.replace(/、$/, '')
+        this.roleShow = false
+      }
+    },
+    sureConfirm() {
+      this.delSuccess = false
+      this.$router.push({
+        name: 'professionLogin'
+      })
     }
   },
   created() {
@@ -481,6 +695,7 @@ export default {
     this.getUserInfo()
     this.getRoleList()
     this.getMemberList()
+    this.getDepartmentList()
   },
   mounted() {
     window.addEventListener('scroll', this.handleScroll)
@@ -719,6 +934,75 @@ export default {
     text-align: center;
     padding: .25rem .2rem;
   }
+  .invite-target-title{
+    padding: 0.3rem 0.4rem;
+    background: #fff;
+    h3 {
+      font-size: 0.32rem;
+      font-weight: bold;
+      color: #3F4663;
+    }
+    p {
+      padding-top: 0.16rem;
+      font-size: 0.22rem;
+      color: #3F4663;
+    }
+  }
+  .invite-target-box .content{
+    color: #94A5BE;
+  }
+  .department-part{
+    .department-list {
+      background: #fff;
+      min-height: 3rem;
+      max-height: 6rem;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 0;
+      .department-item {
+        display: flex;
+        align-items: center;
+        line-height: normal;
+        padding: .1rem 0;
+        border-bottom: none 0;
+        .user-name {
+          font-size: 0.28rem;
+          color: #3F4663;
+        }
+      }
+    }
+    .btn-box{
+      padding: .3rem .3rem;
+      .van-button{
+        height: 1rem;
+        border-radius: 0.2rem;
+        background: #F6F8FD;
+        color: #3F4663;
+      }
+    }
+  }
+  .role-part{
+    .role-list{
+      background: #fff;
+      min-height: 3rem;
+      max-height: 6rem;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 0;
+      .van-cell{
+        padding: .3rem .3rem;
+      }
+    }
+    .btn-box{
+      padding: .3rem .3rem;
+      .van-button{
+        height: 1rem;
+        border-radius: 0.2rem;
+        background: #F6F8FD;
+        color: #3F4663;
+      }
+    }
+  }
 </style>
 <style scoped>
 .sheet-part >>> .van-action-sheet__header {
@@ -728,14 +1012,29 @@ export default {
 .sheet-role-wrap >>> .van-cell {
   padding: 0.4rem 0.35rem;
 }
-.sheet-role-wrap >>> .van-cell::after {
+.sheet-role-wrap >>> .van-cell::after, .invite-target-wrap >>> .van-cell::after {
   left: 0;
   right: 0;
 }
-.sheet-part >>> .van-action-sheet__close {
+.sheet-part >>> .van-action-sheet__close,.invite-target-wrap >>> .van-action-sheet__close{
   font-size: 0.26rem;
   font-weight: bold;
   color: #3F4663;
   z-index: 10;
+}
+.department-part >>> .van-action-sheet__header,.role-part >>> .van-action-sheet__header {
+  padding: 0 0.4rem;
+  font-size: 0.32rem;
+  font-weight: bold;
+  color: #3F4663;
+  text-align: left;
+}
+.department-part >>> .van-action-sheet__close,.role-part >>> .van-action-sheet__close {
+  font-size: 0.26rem;
+  font-weight: bold;
+  color: #3F4663;
+}
+.department-part >>> .van-overlay,.role-part >>> .van-overlay {
+  background-color: transparent;
 }
 </style>

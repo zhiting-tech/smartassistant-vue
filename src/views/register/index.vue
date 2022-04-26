@@ -64,7 +64,7 @@
           <p class="error-tip">{{ verifyCodeErr }}</p>
         </div>
       </div>
-      <div class="btn-box">
+      <div>
         <van-button
           :disabled="!canSubmit"
           class="login-btn"

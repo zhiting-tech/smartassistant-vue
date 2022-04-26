@@ -12,12 +12,12 @@
     </van-nav-bar>
     <div class="nav-group">
       <!--/smartassitant/protocol/user-->
-      <a class="link" href="javascript:;" @click="goAgreement('https://scgz.zhitingtech.com/smartassitant/protocol/user')">
+      <a class="link" href="javascript:;" @click="goAgreement('/smartassitant/protocol/user/')">
         <span>{{ $t('protocol.userAgreement') }}</span>
         <van-icon name="arrow" class="right-icon" size=".4rem" color="#ccc"/>
       </a>
       <!-- /smartassitant/protocol/privacy-->
-      <a class="link" href="javascript:;" @click="goAgreement('https://scgz.zhitingtech.com/smartassitant/protocol/privacy')">
+      <a class="link" href="javascript:;" @click="goAgreement('/smartassitant/protocol/privacy/')">
         <span>{{ $t('protocol.privacyPolicy') }}</span>
         <van-icon name="arrow" class="right-icon" size=".4rem" color="#ccc"/>
       </a>
@@ -25,6 +25,8 @@
   </div>
 </template>
 <script>
+import { envOrigin } from '@/config'
+
 export default {
   name: 'third',
   data() {
@@ -34,8 +36,9 @@ export default {
     onClickLeft() {
       this.$router.go(-1)
     },
-    goAgreement(type) {
-      window.open(type, '_blank')
+    goAgreement(url) {
+      const target = `${envOrigin}${url}`
+      window.open(target, '_blank')
     }
   },
 }

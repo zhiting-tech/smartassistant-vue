@@ -49,15 +49,6 @@ export const deleteDevice = (id, params = {}) => http.d(
 )
 
 /**
-* 添加设备
-@param { device_identity: String } device_identity 设备标识
-*/
-export const addDevice = (params = {}) => http.p(
-  `${apiHeader}/devices`,
-  params
-)
-
-/**
 * 品牌列表
 @param { name:String, type:Number } 名称，类型
 */
@@ -212,6 +203,15 @@ export const sessionLogout = (params = {}) => http.p(
 )
 
 /**
+* 登录
+@param { grant_type: String, refresh_token: String. account_name: String, password: String } 账号 密码
+*/
+export const authLogin = (params = {}) => http.p(
+  `${apiHeader}/oauth/access_token`,
+  params
+)
+
+/**
 * 获取角色列表
 @param { }
 */
@@ -342,6 +342,15 @@ export const getInvitationCode = (id, params = {}) => http.p(
  @param {}
  */
 export const scenesList = (params = {}) => http.g(
+  `${apiHeader}/scenes`,
+  params
+)
+
+/**
+ * 场景列表排序
+ @param {}
+ */
+export const scenesSort = (params = {}) => http.u(
   `${apiHeader}/scenes`,
   params
 )
@@ -535,11 +544,29 @@ export const deleteBackup = (params = {}) => http.d(
 )
 
 /**
+ * 备份路径列表
+ @param {}
+ */
+export const getBackupPaths = (params = {}) => http.g(
+  `${apiHeader}/supervisor/backups/paths`,
+  params
+)
+
+/**
  * 获取版本信息
  @param {}
  */
 export const getSaVersionInfo = (params = {}) => http.g(
   `${apiHeader}/supervisor/update`,
+  params
+)
+
+/**
+ * 获取软件最新版本
+ @param {}
+ */
+export const getSaLatestVersionInfo = (params = {}) => http.g(
+  `${apiHeader}/supervisor/update/latest`,
   params
 )
 
@@ -576,5 +603,140 @@ export const creatPlugins = params => http.g(
  */
 export const deleteCreatPlugin = (id, params = {}) => http.d(
   `${apiHeader}/plugins/${id}`,
+  params
+)
+
+/**
+ * 部门列表
+ @param {}
+ */
+export const departmentsList = params => http.g(
+  `${apiHeader}/departments`,
+  params
+)
+
+/**
+ * 设置部门排序
+ @param { departments_id: String[] } 部门ID列表
+ */
+export const editDepartmentsSort = (params = {}) => http.u(
+  `${apiHeader}/departments`,
+  params
+)
+
+/**
+ * 添加部门
+ @param { id: String, name: String } 公司id 部门名称
+ */
+export const addDepartment = (params = {}) => http.p(
+  `${apiHeader}/departments`,
+  params
+)
+
+/**
+ * 获取部门详情
+ @param { id: String } 路径参数 家庭id
+ */
+export const departmentDetail = (id, params = {}) => http.g(
+  `${apiHeader}/departments/${id}`,
+  params
+)
+
+/**
+ * 添加部门成员
+ @param { id: String, params{users: []} } id部门id， users成员id数组
+ */
+export const addDepartmentMembers = (id, params = {}) => http.p(
+  `${apiHeader}/departments/${id}/users`,
+  params
+)
+
+/**
+ * 更新部门
+ @param { id: String, params{users: []} } id部门id， users成员id数组
+ */
+export const updateDepartment = (id, params = {}) => http.u(
+  `${apiHeader}/departments/${id}`,
+  params
+)
+
+/**
+ * 删除部门
+ @param { id: String, params{users: []} } id部门id， users成员id数组
+ */
+export const deleteDepartment = (id, params = {}) => http.d(
+  `${apiHeader}/departments/${id}`,
+  params
+)
+
+/**
+ * 获取扩展列表
+ @param {}
+ */
+export const extensions = (params = {}) => http.g(
+  `${apiHeader}/extensions`,
+  params
+)
+
+/**
+ * 获取硬件版本信息
+ @param {}
+ */
+export const getFirmwareVersionInfo = (params = {}) => http.g(
+  `${apiHeader}/supervisor/firmware/update`,
+  params
+)
+
+/**
+ * 获取固件最新版本
+ @param {}
+ */
+export const getFirmwareLatestVersionInfo = (params = {}) => http.g(
+  `${apiHeader}/supervisor/firmware/update/latest`,
+  params
+)
+
+/**
+ * 硬件升级
+ @param {}
+ */
+export const updateFirmwareVersion = (params = {}) => http.p(
+  `${apiHeader}/supervisor/firmware/update`,
+  params
+)
+
+/**
+ * 设备图标
+ @param { id: String, params{} } id 设备id
+ */
+export const deviceLogos = (id, params = {}) => http.g(
+  `${apiHeader}/devices/${id}/logo`,
+  params
+)
+
+/**
+ * 挂载硬盘
+ @param {params }
+ */
+export const backupsMount = params => http.p(
+  `${apiHeader}/supervisor/backups/mount`,
+  params
+)
+
+/**
+ * 资源监控  服务列表（cpu，内存）
+ @param {params }
+ */
+export const getResources = params => http.g(
+  `${apiHeader}/resources`,
+  params
+)
+
+/**
+ * 重启服务
+ @param { id: String, params{} } id 设备id
+ */
+export const reStartResources = (id, params) => http.u(
+  `${apiHeader}/resources/containers/${id}`,
   params
 )

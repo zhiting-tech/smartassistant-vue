@@ -146,7 +146,8 @@ export default {
         'thirdExplain',
         'professionLogin',
         'authStepOne',
-        'authStepTwo'
+        'authStepTwo',
+        'outLineHelp'
       ]
       if (whiteList.includes(this.$route.name)) {
         this.isAreaReady = true
@@ -189,7 +190,7 @@ export default {
           user_id: res.data.user_id,
           nickname: res.data.nickname,
           is_owner: res.data.is_owner,
-          is_creator: res.data.is_creator
+          area_type: res.data.area.area_type
         }
         this.setUserInfo(userInfo)
         this.getUserPerimssion(userInfo.user_id)

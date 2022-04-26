@@ -5,21 +5,22 @@
       left-arrow
       :fixed="true"
       :placeholder="true"
-      @click-left="onClickLeft">
+      @click-left="onClickLeft"
+      @click-right="onClickRight">
       <template #left>
         <van-icon name="arrow-left" color="#3f4663"/>
+      </template>
+      <template #right>
+        <span>{{$t('owner.selectFileRecovery')}}</span>
       </template>
     </van-nav-bar>
     <Loading v-if="loading"></Loading>
     <template v-else>
-    <p class="title">{{ $t('owner.backupRecord') }}</p>
+    <div class="title">{{ $t('owner.backupRecord') }}</div>
     <div class="backup-list">
-      <div
-        v-for="item in backupList"
-        :key="item.created_at"
-        class="backup-item">
+      <div v-for="item in backupList" :key="item.created_at" class="backup-item">
         <div class="top">
-          <p class="left">{{ item.logTime }}</p>
+          <p class="left"><span v-if="item.state !== 3" class="state" :class="[item.state === 1?'plain':item.state === 2?'fail':'']">{{item.state === 1?$t('owner.scheduleBackup'):item.state === 2?$t('global.fail'):''}}</span>{{ item.logTime }}</p>
           <p class="center">{{ item.logDate }}</p>
           <div class="right">
             <p v-if="isRecovering && currentBackup.file_name === item.file_name" class="op-btn">
@@ -27,6 +28,7 @@
             </p>
             <template v-else>
               <p
+                v-if="item.state === 3"
                 class="op-btn"
                 :class="{ 'btn-disabled': item.disabled }"
                 @click="handleRecover(item)">
@@ -41,14 +43,17 @@
             </template>
           </div>
         </div>
-        <p class="backup-detail"><span>备注：</span>{{ item.note }}</p>
+        <p class="backup-detail"><span>{{ $t('owner.backupLocation') }}：{{ item.backup_path }}</span></p>
+        <Expand v-if="item.note">
+          <p class="backup-detail"><span>{{ $t('global.remark') }}：</span>{{ item.note }}</p>
+        </Expand>
       </div>
     </div>
     <div class="backup-btn-placeholder">
       <div class="backup-btn-box">
         <van-button
           class="backup-btn"
-          :disabled="isRecovering"
+          :disabled="isRecovering || disableBackup"
           @click="toBackupMark">{{ $t('owner.backupBtn') }}</van-button>
       </div>
     </div>
@@ -71,12 +76,19 @@
 <script>
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import FeedbackDialog from './components/FeedbackDialog.vue'
+import Expand from './components/Expand.vue'
 
 export default {
   name: 'backup',
   components: {
     ConfirmDialog,
-    FeedbackDialog
+    FeedbackDialog,
+    Expand
+  },
+  computed: {
+    disableBackup() {
+      return this.backupList.find(item => item.state === 1)
+    }
   },
   data() {
     return {
@@ -97,7 +109,14 @@ export default {
   },
   methods: {
     onClickLeft() {
-      this.$router.go(-1)
+      this.$router.push({
+        name: 'powerManage'
+      })
+    },
+    onClickRight() {
+      this.$router.push({
+        name: 'recovery'
+      })
     },
     toBackupMark() {
       this.$router.push({
@@ -145,12 +164,16 @@ export default {
       if (item.disabled) {
         return
       }
-      this.opType = 'delete'
-      this.confirmTitle = this.$t('global.del')
-      this.confirmSecondTitle = this.$t('owner.backupDelSecTitle')
-      this.confirmContent = ''
       this.currentBackup = item
-      this.confirmShow = true
+      if (item.state === 1 || item.state === 2) {
+        this.deleteBackup()
+      } else {
+        this.opType = 'delete'
+        this.confirmTitle = this.$t('global.del')
+        this.confirmSecondTitle = this.$t('owner.backupDelSecTitle')
+        this.confirmContent = ''
+        this.confirmShow = true
+      }
     },
     // 处理确定回调
     handleConfirm() {
@@ -173,7 +196,8 @@ export default {
       })
       // 发送请求
       const params = {
-        file_name: this.currentBackup.file_name
+        restore_type: 2,
+        backup_id: this.currentBackup.backup_id
       }
       this.isRecovering = true
       this.http.recoverBackup(params).then((res) => {
@@ -206,6 +230,7 @@ export default {
             this.backupList.forEach((item) => { item.disabled = false })
             this.isRecovering = false
             this.feedbackShow = true
+            this.getBackupList()
           }
         }).catch(() => {
           this.backupSuccess()
@@ -215,7 +240,7 @@ export default {
     // 删除备份处理
     deleteBackup() {
       const params = {
-        file_name: this.currentBackup.file_name
+        backup_id: this.currentBackup.backup_id
       }
       this.http.deleteBackup(params).then((res) => {
         if (res.status !== 0) {
@@ -252,6 +277,23 @@ export default {
       color: #3f4663;
       height: 0.46rem;
       border-right: 1PX solid #eee;
+      .state{
+        display: inline-block;
+        padding: 2px 5px;
+        border: 1px solid;
+        border-radius: 2px;
+        margin-right: .1rem;
+        font-weight: 400;
+        font-size: .2rem;
+      }
+      .state.fail{
+        color: #ee0a24;
+        border-color: #ee0a24;
+      }
+      .state.plain{
+        color: #0bdb99;
+        border-color: #0bdb99;
+      }
     }
     .center {
       align-self: flex-end;
@@ -265,7 +307,7 @@ export default {
     }
     .op-btn {
       display: inline-block;
-      margin-left: 0.6rem;
+      margin-left: 0.4rem;
       font-size: 0.28rem;
       color: #2da3f6;
     }
@@ -293,14 +335,17 @@ export default {
   height: 1.6rem;
 }
 .backup-btn-box {
-  padding: 0.3rem 0;
+  width: 100%;
+  max-width: 750px;
+  padding: 0.3rem .3rem;
   position: fixed;
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
+  background: #f6f8fd;
 }
 .backup-btn {
-  width: 6.9rem;
+  width: 100%;
   height: 1rem;
   background: #2da3f6;
   border-radius: 0.2rem;

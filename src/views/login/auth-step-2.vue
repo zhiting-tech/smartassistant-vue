@@ -53,7 +53,7 @@
         <p v-show="verifyCodeErr" class="error-tip">{{ verifyCodeErr }}</p>
         <p class="info-tip">{{ $t('login.authTip3') }}</p>
       </div>
-      <div class="btn-box">
+      <div>
         <van-button
           class="bind-btn"
           @click="bind"

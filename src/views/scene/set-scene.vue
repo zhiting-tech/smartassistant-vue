@@ -51,9 +51,7 @@
             :disabled="(isEdit && isManual) || !canUpdate">
             <div class="item-list" @click="conditionChange(condition, index)">
               <div class="content">
-                <div class="title">
-                  {{ getConditionTitle(condition) }}
-                </div>
+                <div class="title" v-html="getConditionTitle(condition)"></div>
               </div>
               <div
                 v-if="condition.condition_type === 1 || condition.condition_type === 2"
@@ -114,7 +112,7 @@
             :disabled="!canUpdate">
             <div class="item-list" @click="taskChange(task, index)">
               <div class="content">
-                <div class="title">{{ getTaskTitle(task) }}</div>
+                <div class="title" v-html="getTaskTitle(task)"></div>
                 <div v-if="task.delay_seconds" class="count-down-box">
                   <van-icon name="underway-o"/>
                   <van-count-down
@@ -629,10 +627,47 @@ export default {
         on: this.$t('condition.turnOn'),
         off: this.$t('condition.shutDown')
       }
+      const firstActionMap = {
+        on: this.$t('condition.firstSwitchOn'),
+        off: this.$t('condition.firstSwitchOff')
+      }
+      const secondActionMap = {
+        on: this.$t('condition.secondSwitchOn'),
+        off: this.$t('condition.secondSwitchOff')
+      }
+      const thirdActionMap = {
+        on: this.$t('condition.thirdSwitchOn'),
+        off: this.$t('condition.thirdSwitchOff')
+      }
       const opMap = {
         '>': this.$t('condition.more'),
         '=': this.$t('condition.equal'),
         '<': this.$t('condition.less')
+      }
+      const detectedMap = {
+        1: this.$t('condition.isDetected')
+      }
+      const windowDoorMap = {
+        1: this.$t('condition.offToOn'),
+        0: this.$t('condition.onToOff')
+      }
+      const leakDetectedMap = {
+        1: this.$t('condition.isLeakDetected')
+      }
+      const targetStateMap = {
+        0: this.$t('condition.openAtHome'),
+        1: this.$t('condition.openLeaveHome'),
+        2: this.$t('condition.openSleep'),
+        3: this.$t('condition.closeGuard')
+      }
+      const mapState = {
+        100: this.$t('condition.curtainOpen'),
+        0: this.$t('condition.curtainClose')
+      }
+      const mapPress = {
+        0: this.$t('condition.singlePress'),
+        1: this.$t('condition.doublePress'),
+        2: this.$t('condition.longPress'),
       }
       if (condition.condition_type === 0) {
         return this.$t('creatScene.conditionItemTitle1')
@@ -642,14 +677,62 @@ export default {
       }
       if (condition.condition_type === 2) {
         const item = condition.condition_attr || {}
-        if (item.attribute === 'power') {
+        if (item.type === 'on_off') {
           return actionMap[item.val]
         }
-        if (item.attribute === 'brightness') {
+        if (item.type === 'powers_1') {
+          return firstActionMap[item.val]
+        }
+        if (item.type === 'powers_2') {
+          return secondActionMap[item.val]
+        }
+        if (item.type === 'powers_3') {
+          return thirdActionMap[item.val]
+        }
+        if (item.type === 'brightness') {
           return `${this.$t('condition.brightness')}${opMap[condition.operator]}${this.$methods.getPercent(item.max, item.min, item.val)}%`
         }
-        if (item.attribute === 'color_temp') {
+        if (item.type === 'color_temp') {
           return `${this.$t('condition.temperature')}${opMap[condition.operator]}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+        }
+        if (item.type === 'temperature') {
+          return `${this.$t('condition.temperature')}${opMap[condition.operator]}${item.val}℃`
+        }
+        if (item.type === 'humidity') {
+          return `${this.$t('condition.humidity')}${opMap[condition.operator]}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+        }
+        if (item.type === 'detected') {
+          return detectedMap[item.val]
+        }
+        if (item.type === 'contact_sensor_state') {
+          return windowDoorMap[item.val]
+        }
+        if (item.type === 'leak_detected') {
+          return leakDetectedMap[item.val]
+        }
+        if (item.type === 'target_state') {
+          return targetStateMap[item.val]
+        }
+        if (item.type === 'rgb') {
+          return `${this.$t('condition.color')} <span style="background-color: ${item.val}; display: inline-block; width: .2rem; height: .2rem"></span>`
+        }
+        if (item.type === 'target_position') {
+          if (item.val === 0 || item.val === 100) {
+            if (condition.operator !== '=') {
+              return `${this.$t('condition.curtainTitle')}${opMap[condition.operator]}${item.val}%`
+            }
+            return mapState[item.val]
+          }
+          return `${this.$t('condition.curtainTitle')}${opMap[condition.operator]}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+        }
+        if (item.type === 'switch_event') {
+          return mapPress[item.val]
+        }
+        if (item.type === 'volume') {
+          return `${this.$t('deviceAttr.volume')}${opMap[condition.operator]}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+        }
+        if (item.type === 'motion_detected') {
+          return detectedMap[item.val]
         }
       }
       return ''
@@ -672,16 +755,94 @@ export default {
         off: this.$t('condition.shutDown'),
         toggle: this.$t('condition.change')
       }
+      const firstActionMap = {
+        on: this.$t('condition.firstSwitchOn'),
+        off: this.$t('condition.firstSwitchOff'),
+        toggle: this.$t('condition.firstSwitchChange')
+      }
+      const secondActionMap = {
+        on: this.$t('condition.secondSwitchOn'),
+        off: this.$t('condition.secondSwitchOff'),
+        toggle: this.$t('condition.secondSwitchChange')
+      }
+      const thirdActionMap = {
+        on: this.$t('condition.thirdSwitchOn'),
+        off: this.$t('condition.thirdSwitchOff'),
+        toggle: this.$t('condition.thirdSwitchChange')
+      }
+      const detectedMap = {
+        1: this.$t('condition.isDetected')
+      }
+      const windowDoorMap = {
+        0: this.$t('condition.offToOn'),
+        1: this.$t('condition.onToOff')
+      }
+      const leakDetectedMap = {
+        1: this.$t('condition.isLeakDetected')
+      }
+      const targetStateMap = {
+        0: this.$t('condition.openAtHome'),
+        1: this.$t('condition.openLeaveHome'),
+        2: this.$t('condition.openSleep'),
+        3: this.$t('condition.closeGuard')
+      }
+      const mapState = {
+        100: this.$t('condition.curtainOpen'),
+        0: this.$t('condition.curtainClose')
+      }
       if (task.attributes && task.attributes.length) {
         task.attributes.forEach((item) => {
-          if (item.attribute === 'power') {
+          if (item.type === 'on_off') {
             res += actionMap[item.val]
           }
-          if (item.attribute === 'brightness') {
+          if (item.type === 'powers_1') {
+            res += firstActionMap[item.val]
+          }
+          if (item.type === 'powers_2') {
+            res += secondActionMap[item.val]
+          }
+          if (item.type === 'powers_3') {
+            res += thirdActionMap[item.val]
+          }
+          if (item.type === 'brightness') {
             res += `${this.$t('condition.brightness')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
           }
-          if (item.attribute === 'color_temp') {
-            res += `${this.$t('condition.temperature')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+          if (item.type === 'color_temp') {
+            res += `${this.$t('condition.colorTemperature')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+          }
+          if (item.type === 'temperature') {
+            res += `${this.$t('condition.temperature')}${item.val}℃`
+          }
+          if (item.type === 'humidity') {
+            res += `${this.$t('condition.humidity')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+          }
+          if (item.type === 'detected') {
+            res += detectedMap[item.val]
+          }
+          if (item.type === 'contact_sensor_state') {
+            res += windowDoorMap[item.val]
+          }
+          if (item.type === 'leak_detected') {
+            res += leakDetectedMap[item.val]
+          }
+          if (item.type === 'target_state') {
+            res += targetStateMap[item.val]
+          }
+          if (item.type === 'rgb') {
+            res += `${this.$t('condition.color')} <span style="background-color: ${item.val}; display: inline-block; width: .2rem; height: .2rem"></span>`
+          }
+          if (item.type === 'target_position') {
+            if (item.val === 0 || item.val === 100) {
+              res += mapState[item.val]
+            } else {
+              res += `${this.$t('condition.curtainTitle')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+            }
+          }
+          if (item.type === 'volume') {
+            res += `${this.$t('deviceAttr.volume')}${this.$methods.getPercent(item.max, item.min, item.val)}%`
+          }
+          if (item.type === 'motion_detected') {
+            res += detectedMap[item.val]
           }
           res += '、'
         })
@@ -795,7 +956,8 @@ export default {
           name: 'conditionsList',
           query: {
             sceneId: this.$route.query.sceneId,
-            op: 'condition'
+            op: 'condition',
+            type: 2
           }
         })
       }
@@ -851,7 +1013,8 @@ export default {
           name: 'conditionsList',
           query: {
             sceneId: this.$route.query.sceneId,
-            op: 'execution'
+            op: 'execution',
+            type: 1
           }
         })
       } else if (item.value === 2) {

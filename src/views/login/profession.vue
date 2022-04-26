@@ -40,17 +40,17 @@
               <img
                 v-show="!isPassWordShow"
                 @click="isPassWordShow = !isPassWordShow"
-                src="../../assets/eye-close-icon.png"/>
+                src="../../assets/eye-open-icon.png"/>
               <img
                 v-show="isPassWordShow"
                 @click="isPassWordShow = !isPassWordShow"
-                src="../../assets/eye-open-icon.png"/>
+                src="../../assets/eye-close-icon.png"/>
             </div>
           </div>
           <p class="error-tip">{{ passwordErr }}</p>
         </div>
       </div>
-      <div class="btn-box">
+      <div>
         <van-button
           class="login-btn"
           @click="login"
@@ -59,13 +59,14 @@
     </div>
     <div class="protocol">
       <van-checkbox icon-size=".28rem" v-model="checked">{{$t('login.checkedText')}}</van-checkbox>
-      <a href="javascript:;" @click="goAgreement('https://scgz.zhitingtech.com/smartassitant/protocol/user')">{{$t('login.agreementUser')}}</a>、
-      <a href="javascript:;" @click="goAgreement('https://scgz.zhitingtech.com/smartassitant/protocol/privacy')">{{$t('login.agreementPrivacy')}}</a>
+      <a href="javascript:;" @click="goAgreement('/smartassitant/protocol/user/')">{{$t('login.agreementUser')}}</a>、
+      <a href="javascript:;" @click="goAgreement('/smartassitant/protocol/privacy/')">{{$t('login.agreementPrivacy')}}</a>
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from 'vuex'
+import { envOrigin } from '@/config'
 
 export default {
   name: 'login',
@@ -124,26 +125,29 @@ export default {
     },
     // 登录
     login() {
-      if (!this.checked) {
-        this.$toast(this.$t('login.protocol'))
+      if (!this.verify()) {
         return
       }
-      if (!this.verify()) {
+      if (!this.checked) {
+        this.$toast(this.$t('login.protocol'))
         return
       }
       // 模拟发送登录请求
       this.loading = true
       const params = {
+        grant_type: 'password',
         account_name: this.account,
         password: this.password
       }
-      this.http.sessionLogin(params).then((res) => {
+      this.http.authLogin(params).then((res) => {
         this.loading = false
         if (res.status !== 0) {
           return
         }
-        const { token, user_id: userId } = res.data.user_info
+        const { user_id: userId } = res.data.user_info
+        const { access_token: token, refresh_token: refreshToken } = res.data.token_info
         this.$methods.setStore('token', token)
+        this.$methods.setStore('refreshToken', refreshToken)
         this.$methods.setStore('userId', userId)
         this.setToken(token)
         this.setUserInfo(res.data.user_info)
@@ -160,8 +164,9 @@ export default {
         this.loading = false
       })
     },
-    goAgreement(type) {
-      window.open(type, '_blank')
+    goAgreement(url) {
+      const target = `${envOrigin}${url}`
+      window.open(target, '_blank')
     }
   }
 }

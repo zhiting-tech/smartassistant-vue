@@ -5,9 +5,10 @@
       left-arrow
       :fixed="true"
       :placeholder="true"
-      @click-left="onClickLeft">
+      @click-left="onClickLeft"
+    >
       <template #left>
-        <van-icon name="arrow-left" color="#3F4663"/>
+        <van-icon name="arrow-left" color="#3F4663" />
       </template>
     </van-nav-bar>
     <div class="progress">
@@ -18,20 +19,28 @@
         color="#2DA3F6"
         layer-color="#DDE5EB"
         size="4.6rem"
-        :stroke-width="40"/>
+        :stroke-width="40"
+      />
       <div class="spaner">
         <p class="rate-font">{{ rateFixed }}<span>%</span></p>
       </div>
     </div>
-    <p v-if="isConnecting" class="connecting">{{ $t('connect.connect') }}...</p>
+    <p v-if="isConnecting" class="connecting">{{ $t("connect.connect") }}...</p>
     <template v-else>
       <div v-if="isConnectSuccess" class="connect-success">
-        <van-icon name="checked" size="0.4rem" color="#0BDB99"/>
-        <span>{{ $t('connect.success') }}</span>
+        <van-icon name="checked" size="0.4rem" color="#0BDB99" />
+        <span>{{ $t("connect.success") }}</span>
       </div>
-      <div v-else class="connect-fail">
-        <p>{{ $t('connect.fail') }}</p>
-        <button @click="reScan">{{ $t('connect.retry') }}</button>
+      <div v-if="!isHomekit" class="connect-fail">
+        <p class="fail">{{ $t("connect.fail") }}</p>
+        <p class="tip">请检查并确保：</p>
+        <p class="tip">1、设备正常供电；</p>
+        <p class="tip">2、设备网络连接正常；</p>
+        <div class="btn-box-placeholder">
+          <div class="btn-box">
+            <van-button class="btn" @click="retry">{{ $t("connect.retry") }}</van-button>
+          </div>
+        </div>
       </div>
     </template>
   </div>
@@ -54,10 +63,13 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['websocket']),
+    ...mapGetters(['websocket', 'userInfo']),
     rateFixed() {
       return parseInt(this.currentRate, 10)
-    }
+    },
+    isHomekit() {
+      return this.device.auth_required === 'true' || this.device.auth_required
+    },
   },
   methods: {
     onClickLeft() {
@@ -68,72 +80,38 @@ export default {
       const areaId = this.device.area_id
       const device = Object.assign({}, this.device)
       delete device.area_id
-      const params = {
-        device
-      }
       this.isConnecting = true
-      if (device.plugin_id === 'homekit') {
+      if (this.isHomekit) {
         // 发送发现指令
         this.msgId = Date.now()
         this.websocket.send({
           id: this.msgId,
-          domain: 'homekit',
-          service: 'set_attributes',
-          identity: device.identity,
-          service_data: {
-            attributes: [
-              {
-                attribute: 'pin',
-                instance_id: 1,
-                val: device.code
-              }
-            ]
-          }
-        })
-        // 接受消息
-        this.websocket.onmessage((data) => {
-          const msg = JSON.parse(data)
-          if (msg.id === this.msgId) {
-            if (msg.success) {
-              this.http.addDevice(params).then((res) => {
-                this.isConnecting = false
-                clearInterval(this.timer)
-                if (res.status === 0) {
-                  this.rate = 100
-                  this.isConnectSuccess = true
-                  // 跳转至设备详情页
-                  setTimeout(() => {
-                    this.$router.replace({
-                      name: 'locationSetting',
-                      query: {
-                        from: device.name,
-                        areaId,
-                        deviceId: res.data.device_id
-                      }
-                    })
-                  }, 1000)
-                } else {
-                  this.isConnectSuccess = false
-                }
-              }).catch(() => {
-                clearInterval(this.timer)
-                this.isConnecting = false
-              })
-            } else {
-              device.error = 400
-              // 跳转至设备详情页
-              this.$router.replace({
-                name: 'homeKit',
-                query: device
-              })
-            }
-          }
+          domain: device.plugin_id,
+          service: 'connect',
+          data: {
+            iid: device.iid,
+            auth_params: {
+              pin: device.code
+            },
+          },
         })
       } else {
-        this.http.addDevice(params).then((res) => {
-          this.isConnecting = false
-          clearInterval(this.timer)
-          if (res.status === 0) {
+        // 发送发现指令
+        this.msgId = Date.now()
+        this.websocket.send({
+          id: this.msgId,
+          domain: device.plugin_id,
+          service: 'connect',
+          data: {
+            iid: device.iid
+          },
+        })
+      }
+      // 接受消息
+      this.websocket.onmessage((data) => {
+        const msg = JSON.parse(data)
+        if (msg.id === this.msgId) {
+          if (msg.success) {
             this.rate = 100
             this.isConnectSuccess = true
             // 跳转至设备详情页
@@ -143,18 +121,24 @@ export default {
                 query: {
                   from: device.name,
                   areaId,
-                  deviceId: res.data.device_id
-                }
+                  deviceId: msg.data.device.id,
+                },
               })
             }, 1000)
           } else {
+            clearInterval(this.timer)
+            this.isConnecting = false
             this.isConnectSuccess = false
+            device.error = msg.error.message
+            if (this.isHomekit) {
+              this.$router.push({
+                name: 'homeKit',
+                query: device
+              })
+            }
           }
-        }).catch(() => {
-          clearInterval(this.timer)
-          this.isConnecting = false
-        })
-      }
+        }
+      })
     },
     // 模拟进度条
     mockProcess() {
@@ -167,14 +151,13 @@ export default {
         this.rate = this.rate + 2
       }, 50)
     },
-    // 重新扫描
-    reScan() {
-      this.onClickLeft()
+    // 重新连接
+    retry() {
+      this.connectDevice()
     },
   },
   created() {
     this.device = this.$route.query
-    console.log(this.device)
     if (Object.keys(this.device).length) {
       // 连接设备
       this.connectDevice()
@@ -203,7 +186,7 @@ export default {
 .rate-font {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #3F4663;
+  color: #3f4663;
   span {
     font-size: 0.75rem;
   }
@@ -211,25 +194,23 @@ export default {
 .connecting {
   padding-top: 0.53rem;
   font-size: 0.28rem;
-  color: #94A5BE;
+  color: #94a5be;
   text-align: center;
 }
 .connect-fail {
   padding-top: 0.5rem;
   text-align: center;
-  p {
-    padding-bottom: 0.86rem;
+  .fail {
+    padding-bottom: 0.5rem;
     font-size: 0.28rem;
-    color: #FE0000;
+    color: #fe0000;
   }
-  button {
-    width: 3rem;
-    height: 1rem;
-    background: #2DA3F6;
-    border-radius: 0.2rem;
+  .tip {
+    padding: 0 0.24rem;
+    text-align: left;
     font-size: 0.28rem;
-    font-weight: bold;
-    color: #ffffff;
+    color: #94a5be;
+    line-height: 0.4rem;
   }
 }
 .connect-success {

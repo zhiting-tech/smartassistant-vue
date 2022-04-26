@@ -17,6 +17,13 @@
       :focused="showKeyboard"
       :mask="false"
       :error-info="errorInfo"/>
+    <div v-if="errorInfo" class="connect-fail">
+      <p class="fail" v-if="false">{{ errorInfo || '设置代码不正确，请重新输入！' }}</p>
+      <p class="tip">请检查并确保：</p>
+      <p class="tip">1、设备正常供电；</p>
+      <p class="tip">2、设备与智慧中心处于同一局域网；</p>
+      <p class="tip">3、设备未被其他中心枢纽连接；</p>
+    </div>
   </div>
 </template>
 <script>
@@ -72,12 +79,12 @@ export default {
   mounted() {
     this.queryData = this.$route.query
     if (this.$route.query.error) {
-      this.errorInfo = '设置代码不正确，请重新输入！'
+      this.errorInfo = this.$route.query.error
       this.code = ''
     }
-    // this.$nextTick(() => {
-    //   this.$refs.codeInput.focus()
-    // })
+    this.$nextTick(() => {
+      this.$refs.codeInput.focus()
+    })
   }
 }
 </script>
@@ -103,6 +110,20 @@ export default {
     background-color: transparent;
     text-shadow: 0 0 0 transparent;
     opacity: 0;
+  }
+  .connect-fail {
+    padding: .3rem .3rem;
+    .fail {
+      font-size: 0.28rem;
+      color: #fe0000;
+      margin-bottom: .3rem;
+    }
+    .tip {
+      text-align: left;
+      font-size: 0.28rem;
+      color: #94a5be;
+      margin-bottom: .15rem;
+    }
   }
 </style>
 <style scoped>

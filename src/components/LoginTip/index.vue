@@ -9,7 +9,8 @@
     <div class="van-dialog__message">
       <div class="tips-icon"><img :src="require('../../assets/tips-warning.png')" /></div>
       <div class="tips-title">提示</div>
-      <div v-if="status === 5003">当前终端无凭证或已过期，请拥有者在专业版中设置允许找回用户凭证后重新登录。</div>
+      <div v-if="status === 5012">当前终端无凭证或已过期，请拥有者在专业版中设置允许找回用户凭证后重新登录。</div>
+      <div v-else-if="status === 5031">密码已修改，请重新登录。</div>
       <div v-else-if="areaName" class="tips-text">你已被管理员移出“{{ areaName }}”</div>
       <div v-else class="tips-text">你已被管理员移出家庭/公司</div>
     </div>

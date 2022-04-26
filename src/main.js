@@ -40,7 +40,12 @@ import {
   Uploader,
   Calendar,
   Overlay,
-  Progress
+  Progress,
+  Col,
+  Row,
+  DatetimePicker,
+  DropdownMenu,
+  DropdownItem,
 } from 'vant'
 
 import i18n from './lang/index' // 多语言
@@ -57,6 +62,7 @@ import Bus from './bus/index'
 import 'vant/lib/index.css'
 // eslint-disable-next-line
 import '@vant/touch-emulator'
+import 'zt-plugin-sdk'
 
 Vue.use(Tabbar)
   .use(TabbarItem)
@@ -99,6 +105,11 @@ Vue.use(Tabbar)
   .use(Calendar)
   .use(Overlay)
   .use(Progress)
+  .use(Col)
+  .use(Row)
+  .use(DatetimePicker)
+  .use(DropdownMenu)
+  .use(DropdownItem)
 
 // 注册全局image组件
 Vue.component('CommonImage', CommonImage)
